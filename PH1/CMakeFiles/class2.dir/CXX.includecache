@@ -1,0 +1,42 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/graf/Documents/Processo Educativo/UM Mestrado Integrado em Engenharia Informática/Ano 3/2º Semestre/Computação Gráfica/projeto/PH1/main.cpp
+GLUT/glut.h
+-
+GL/glut.h
+-
+math.h
+-
+cstdio
+-
+cstdlib
+-
+monadWindow.h
+/Users/graf/Documents/Processo Educativo/UM Mestrado Integrado em Engenharia Informática/Ano 3/2º Semestre/Computação Gráfica/projeto/PH1/monadWindow.h
+
+/Users/graf/Documents/Processo Educativo/UM Mestrado Integrado em Engenharia Informática/Ano 3/2º Semestre/Computação Gráfica/projeto/PH1/monadWindow.cpp
+GLUT/glut.h
+-
+GL/glut.h
+-
+math.h
+-
+cstdio
+-
+cstdlib
+-
+list
+-
+monadWindow.h
+/Users/graf/Documents/Processo Educativo/UM Mestrado Integrado em Engenharia Informática/Ano 3/2º Semestre/Computação Gráfica/projeto/PH1/monadWindow.h
+
+/Users/graf/Documents/Processo Educativo/UM Mestrado Integrado em Engenharia Informática/Ano 3/2º Semestre/Computação Gráfica/projeto/PH1/monadWindow.h
+list
+-
+
