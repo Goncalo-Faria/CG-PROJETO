@@ -5,7 +5,7 @@ PROJECT(class2)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-add_executable(${PROJECT_NAME} main.cpp monadWindow.cpp)
+add_executable(${PROJECT_NAME} main.cpp monadWindow.cpp tinyxml2.cpp)
 
 find_package(OpenGL REQUIRED)
 include_directories(${OpenGL_INCLUDE_DIRS})

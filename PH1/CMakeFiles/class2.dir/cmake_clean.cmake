@@ -1,6 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/class2.dir/main.cpp.o"
   "CMakeFiles/class2.dir/monadWindow.cpp.o"
+  "CMakeFiles/class2.dir/tinyxml2.cpp.o"
   "class2.pdb"
   "class2"
 )

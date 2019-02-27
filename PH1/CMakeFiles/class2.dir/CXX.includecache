@@ -35,8 +35,54 @@ list
 -
 monadWindow.h
 /Users/graf/Documents/Processo Educativo/UM Mestrado Integrado em Engenharia Informática/Ano 3/2º Semestre/Computação Gráfica/projeto/PH1/monadWindow.h
+tinyxml2.h
+/Users/graf/Documents/Processo Educativo/UM Mestrado Integrado em Engenharia Informática/Ano 3/2º Semestre/Computação Gráfica/projeto/PH1/tinyxml2.h
 
 /Users/graf/Documents/Processo Educativo/UM Mestrado Integrado em Engenharia Informática/Ano 3/2º Semestre/Computação Gráfica/projeto/PH1/monadWindow.h
 list
+-
+
+/Users/graf/Documents/Processo Educativo/UM Mestrado Integrado em Engenharia Informática/Ano 3/2º Semestre/Computação Gráfica/projeto/PH1/tinyxml2.cpp
+tinyxml2.h
+/Users/graf/Documents/Processo Educativo/UM Mestrado Integrado em Engenharia Informática/Ano 3/2º Semestre/Computação Gráfica/projeto/PH1/tinyxml2.h
+new
+-
+stddef.h
+-
+stdarg.h
+-
+cstddef
+-
+cstdarg
+-
+
+/Users/graf/Documents/Processo Educativo/UM Mestrado Integrado em Engenharia Informática/Ano 3/2º Semestre/Computação Gráfica/projeto/PH1/tinyxml2.h
+ctype.h
+-
+limits.h
+-
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+stddef.h
+-
+cctype
+-
+climits
+-
+cstdio
+-
+cstdlib
+-
+cstring
+-
+stdint.h
+-
+android/log.h
+-
+assert.h
 -
 

@@ -6,4 +6,8 @@ CMakeFiles/class2.dir/main.cpp.o: monadWindow.h
 
 CMakeFiles/class2.dir/monadWindow.cpp.o: monadWindow.cpp
 CMakeFiles/class2.dir/monadWindow.cpp.o: monadWindow.h
+CMakeFiles/class2.dir/monadWindow.cpp.o: tinyxml2.h
+
+CMakeFiles/class2.dir/tinyxml2.cpp.o: tinyxml2.cpp
+CMakeFiles/class2.dir/tinyxml2.cpp.o: tinyxml2.h
 

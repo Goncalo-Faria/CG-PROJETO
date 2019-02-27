@@ -47,15 +47,15 @@ void circle(MonadWindow reference,int points){
 	float otherside = sqrt(2*1.0-2*1.0*cos(180-angle));
 	MonadWindow mon = mkMonadWindow(reference);
 
-	printf("angle : %f :| %f|> l : %f : r : %f || %f \n",angle , tangle ,1.0, otherside, 180 - angle/2);
+	//printf("angle : %f :| %f|> l : %f : r : %f || %f \n",angle , tangle ,1.0, otherside, 180 - angle/2);
 
-	glBegin(GL_TRIANGLES);
+	//glBegin(GL_TRIANGLES);
 
 		for(int i = 0; i< points;i++){
 			monadTriangle(mon,angle);
 		}
 
-	glEnd();
+	//glEnd();
 
 }
 
@@ -138,10 +138,8 @@ void renderScene(void) {
 	if( i == 1)
 		print_trace(reference);
 	//sphere( reference, 3, 1);
-	glBegin(GL_TRIANGLES);
-	glEnd();
 	
-
+	unmkMonadWindow(reference);
 
 	// End of frame
 	glutSwapBuffers();

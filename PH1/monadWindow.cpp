@@ -9,7 +9,9 @@
 #include <cstdlib>
 #include <list>
 #include "monadWindow.h"
+#include "tinyxml2.h"
 
+using namespace tinyxml2; 
 
 typedef struct point {
 	float p[3];
@@ -43,21 +45,36 @@ void unmkPoint(Point p){
 
 void print_trace(MonadWindow m){
 	int count=0;
-	printf("< figure >\n");
+	char buffer[4000];
+
+	XMLDocument* doc = new XMLDocument();
+	XMLNode* major = doc->InsertEndChild( doc->NewElement( "figure" ) );
+	XMLElement* triangle;
+	XMLElement *point;
+	XMLNode* ntraingle, *npoint;
+	XMLText* text;
 	for(L cur = m->front; cur ; cur = cur->px){
 
-		
 		if(!(count%3) ){
-			if(count)
-				printf("\t</ triangle >\n");
-			printf("\t< triangle >\n");
+			triangle = doc->NewElement( "triangle" );
+			ntraingle = major->InsertEndChild( triangle );
 		}
-		printf("\t\t(%f,%f,%f);\n",cur->value->p[0],cur->value->p[1],cur->value->p[2]);
+		
+		sprintf(buffer,"(%f,%f,%f)\n",cur->value->p[0],cur->value->p[1],cur->value->p[2]);
+		
+		point = doc->NewElement( "point" );
+		npoint = ntraingle->InsertEndChild( point );
+
+		point->SetAttribute("x",cur->value->p[0]);
+		point->SetAttribute("y",cur->value->p[1]);
+		point->SetAttribute("z",cur->value->p[2]);
+
 		count++;
 	}
-	printf("\t</ triangle >\n");
-	printf("</ figure >\n");
 
+	doc->SaveFile("figure.xml");
+
+	delete doc;
 }
 
 
@@ -263,7 +280,7 @@ void plataform(MonadWindow reference, int points,float h, float bottomradius, fl
 
 	monadScale(db, bottomradius, bottomradius ,1 );
 	monadScale(ub, topradius,topradius ,1 );
-	glBegin(GL_TRIANGLES);
+	//glBegin(GL_TRIANGLES);
 
 		for(int i = 0; i< points;i++){
 			monadTriangle(ub, angle);
@@ -300,7 +317,7 @@ void plataform(MonadWindow reference, int points,float h, float bottomradius, fl
 
 		unmkMonadWindow(db);
 		unmkMonadWindow(ub);
-	glEnd();
+	//glEnd();
 
 }
 
