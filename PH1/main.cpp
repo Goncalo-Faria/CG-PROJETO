@@ -22,21 +22,28 @@ float cuple( float dh, float h ){
 	return sqrt( (h*h  - dh*dh) )/h;
 }
 
-void sphere(MonadWindow reference,int points, int stacks ){
+void sphere(MonadWindow reference, float radius, int slices, int stacks) {
 	MonadWindow nw = mkMonadWindow(reference);
-	stacker(nw,points,stacks,1, cuple );
+    monadScale(nw, radius, radius, radius);
+	stacker(nw,slices,stacks,1, cuple);
 	monadRotate(nw,180,1.0,0.0,0.0);
-	stacker(nw, points,stacks,1, cuple );
-	//monadRotate(nw,180,0.0,1.0,0.0);
+	stacker(nw, slices,stacks,1, cuple);
 	unmkMonadWindow(nw);
 }
 
-int main(int argc, char **argv) {
+void cone(MonadWindow reference, float radius, float height, int slices, int stacks) {
+    float normalizeHeight = height/radius;
+    MonadWindow nw = mkMonadWindow(reference);
+    monadScale(nw, radius, radius, radius);
+    stacker(nw, slices, stacks, normalizeHeight, lin);
+    unmkMonadWindow(nw);
+}
 
+int main(int argc, char **argv) {
 	MonadWindow reference = mkMonadWindow();
-	stacker(reference,3,1,1,lin);
+    cone(reference, 2, 4, 10, 1);
 	print_trace(reference,"figure.xml","figure");
-	
+
 	unmkMonadWindow(reference);
 	return 1;
 }
