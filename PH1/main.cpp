@@ -39,9 +39,22 @@ void cone(MonadWindow reference, float radius, float height, int slices, int sta
     unmkMonadWindow(nw);
 }
 
+void plane(MonadWindow reference) {
+    MonadWindow nw = mkMonadWindow(reference);
+    monadTranslate(nw, -0.5, 0.0, -0.5);
+
+    monadPoint(nw, 1.0, 0.0, 0.0);
+    monadPoint(nw, 0.0, 0.0, 0.0);
+    monadPoint(nw, 1.0, 0.0, 1.0);
+
+    monadPoint(nw, 0.0, 0.0, 1.0);
+    monadPoint(nw, 1.0, 0.0, 1.0);
+    monadPoint(nw, 0.0, 0.0, 0.0);
+}
+
 int main(int argc, char **argv) {
 	MonadWindow reference = mkMonadWindow();
-    cone(reference, 2, 4, 10, 1);
+    plane(reference);
 	print_trace(reference,"figure.xml","figure");
 
 	unmkMonadWindow(reference);
