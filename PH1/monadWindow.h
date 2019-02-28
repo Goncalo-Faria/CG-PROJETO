@@ -1,8 +1,6 @@
 #ifndef monadWindow_h
 #define monadWindow_h
 
-#include <list>
-
 typedef struct monad *MonadWindow;
 
 MonadWindow mkMonadWindow();
@@ -27,6 +25,6 @@ void stacker(MonadWindow reference,int points, int stacks, float h, float (*f)(f
 
 void plataform(MonadWindow reference, int points,float h, float bottomradius, float topradius);
 
-void print_trace(MonadWindow m);
+void print_trace(MonadWindow m, char* filename, char* figure);
 
 #endif

@@ -1,13 +1,6 @@
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
-
 #include <math.h>
 #include <cstdio>
 #include <cstdlib>
-#include <list>
 #include "monadWindow.h"
 #include "tinyxml2.h"
 
@@ -43,12 +36,11 @@ void unmkPoint(Point p){
 }
 
 
-void print_trace(MonadWindow m){
+void print_trace(MonadWindow m, char* filename, char* figure){
 	int count=0;
-	char buffer[4000];
 
 	XMLDocument* doc = new XMLDocument();
-	XMLNode* major = doc->InsertEndChild( doc->NewElement( "figure" ) );
+	XMLNode* major = doc->InsertEndChild( doc->NewElement(figure) );
 	XMLElement* triangle;
 	XMLElement *point;
 	XMLNode* ntraingle, *npoint;
@@ -59,9 +51,7 @@ void print_trace(MonadWindow m){
 			triangle = doc->NewElement( "triangle" );
 			ntraingle = major->InsertEndChild( triangle );
 		}
-		
-		sprintf(buffer,"(%f,%f,%f)\n",cur->value->p[0],cur->value->p[1],cur->value->p[2]);
-		
+				
 		point = doc->NewElement( "point" );
 		npoint = ntraingle->InsertEndChild( point );
 
@@ -72,7 +62,7 @@ void print_trace(MonadWindow m){
 		count++;
 	}
 
-	doc->SaveFile("figure.xml");
+	doc->SaveFile(filename);
 
 	delete doc;
 }
@@ -113,7 +103,6 @@ MonadWindow mkMonadWindow(MonadWindow mold){
 
 	return m;
 }
-
 
 void monadReference(MonadWindow  m, Point p){
 	if( !m->ref ){
