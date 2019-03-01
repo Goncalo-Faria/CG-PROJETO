@@ -44,106 +44,55 @@ void cone(MonadWindow reference, float radius, float height, int slices, int sta
 void plane(MonadWindow reference) {
     MonadWindow nw = mkMonadWindow(reference);
 
-    monadPoint(nw,-0.5,0,-0.5);
-    monadPoint(nw,-0.5,0,0.5);
-    monadPoint(nw,0.5,0,-0.5);
+    monadPoint(nw,-0.5,0,-0.5);
+    monadPoint(nw,-0.5,0,0.5);
+    monadPoint(nw,0.5,0,-0.5);
 
-    monadPoint(nw,-0.5,0,0.5);
-    monadPoint(nw,0.5,0,0.5);
-    monadPoint(nw,0.5,0,-0.5);
-
-    unmkMonadWindow(nw);
-}
-
-void planeXZ(MonadWindow reference, float lengthX, float lenghtY, float lenghtZ) {
-    MonadWindow nw = mkMonadWindow(reference);
-    monadTranslate(nw, -lengthX/2, 0.0, -lenghtZ/2);
-
-    monadPoint(nw, lengthX, 0.0, 0.0);
-    monadPoint(nw, 0.0, 0.0, 0.0);
-    monadPoint(nw, lengthX, 0.0, lenghtZ);
-
-    monadPoint(nw, 0.0, 0.0, lenghtZ);
-    monadPoint(nw, lengthX, 0.0, lenghtZ);
-    monadPoint(nw, 0.0, 0.0, 0.0);
+    monadPoint(nw,-0.5,0,0.5);
+    monadPoint(nw,0.5,0,0.5);
+    monadPoint(nw,0.5,0,-0.5);
 
     unmkMonadWindow(nw);
-}
-
-void planeXY(MonadWindow reference, float lengthX, float lengthY, float lenghtZ) {
-    MonadWindow nw = mkMonadWindow(reference);
-    monadTranslate(nw, -lengthX/2, 0.0, -lenghtZ/2);
-
-    monadPoint(nw, lengthX, 0.0, 0.0);
-    monadPoint(nw, 0.0, 0.0, 0.0);
-    monadPoint(nw, lengthX, lengthY, 0.0);
-
-    monadPoint(nw, 0.0, lengthY, 0.0);
-    monadPoint(nw, lengthX, lengthY, 0.0);
-    monadPoint(nw, 0.0, 0.0, 0.0);
-}
-
-void planeYZ(MonadWindow reference, float lengthX, float lengthY, float lenghtZ) {
-    MonadWindow nw = mkMonadWindow(reference);
-    monadTranslate(nw, -lengthX/2, 0.0, -lenghtZ/2);
-
-    monadPoint(nw, 0.0, lengthY, 0.0);
-    monadPoint(nw, 0.0, 0.0, 0.0);
-    monadPoint(nw, 0.0, lengthY, lenghtZ);
-
-    monadPoint(nw, 0.0, 0.0, lenghtZ);
-    monadPoint(nw, 0.0, lengthY, lenghtZ);
-    monadPoint(nw, 0.0, 0.0, 0.0);
-}
-
-void planeMod(MonadWindow reference, float lengthX, float lengthY, float lenghtZ, int nx, int ny, int nz) {
-    MonadWindow nw = mkMonadWindow(reference);
-    monadTranslate(nw, 0.0, 0.0, 0.0);
-
-    monadPoint(nw, 0.0, lengthY, 0.0);
-    monadPoint(nw, 0.0, 0.0, 0.0);
-    monadPoint(nw, 0.0, lengthY, lenghtZ);
-
-    monadPoint(nw, 0.0, 0.0, lenghtZ);
-    monadPoint(nw, 0.0, lengthY, lenghtZ);
-    monadPoint(nw, 0.0, 0.0, 0.0);
 }
 
 void cube(MonadWindow reference, int divisions) {
     MonadWindow nw = mkMonadWindow(reference);
 
-    monadTranslate(nw, 0.0, -0.5, 0.0); 
+    monadTranslate(nw, 0.0, -0.5, 0.0);
     monadRotate(nw, 180, 1.0, 0.0, 0.0);
-    
-    plane(nw); //face tem que estar ao contrario
+    plane(nw);
     
     back(nw,reference);
-
-    monadTranslate(nw, 0.0, 0.5, 0.0); 
+    monadTranslate(nw, 0.0, 0.5, 0.0);
     plane(nw);
     
     back(nw,reference);
     monadRotate(nw,90,1,0,0);
-    monadTranslate(nw, 0.0, 0.5, 0.0); 
+    monadTranslate(nw, 0.0, 0.5, 0.0);
     plane(nw);
+
     monadTranslate(nw, 0.0, -1.0, 0.0);
     monadRotate(nw,180,1,0,0);
     plane(nw);
 
     back(nw,reference);
-
     monadRotate(nw,90,0,0,-1);
-    monadTranslate(nw, 0.0, 0.5, 0.0); 
+    monadTranslate(nw, 0.0, 0.5, 0.0);
     plane(nw);
+
     monadTranslate(nw, 0.0, -1.0, 0.0);
     monadRotate(nw,180,0,0,-1);
     plane(nw);
+
     unmkMonadWindow(nw);
 }
 
 int main(int argc, char **argv) {
 	MonadWindow reference = mkMonadWindow();
+
+	monadScale(reference, 2.0,2.0,2.0);
     cube(reference, 44);
+    
     print_trace(reference,"figure.xml","figure");
 
 	unmkMonadWindow(reference);
