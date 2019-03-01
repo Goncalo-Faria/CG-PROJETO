@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include "monadWindow.h"
 
+#define back(X,Y) unmkMonadWindow(X);X = mkMonadWindow(Y)
+
 void circle(MonadWindow reference,int points){
 	float tangle = (float)((points - 2) * 180);
 	float angle = tangle/points;
@@ -41,15 +43,14 @@ void cone(MonadWindow reference, float radius, float height, int slices, int sta
 
 void plane(MonadWindow reference) {
     MonadWindow nw = mkMonadWindow(reference);
-    monadTranslate(nw, -0.5, 0.0, -0.5);
 
-    monadPoint(nw, 1.0, 0.0, 0.0);
-    monadPoint(nw, 0.0, 0.0, 0.0);
-    monadPoint(nw, 1.0, 0.0, 1.0);
+    monadPoint(nw,-0.5,0,-0.5);
+    monadPoint(nw,-0.5,0,0.5);
+    monadPoint(nw,0.5,0,-0.5);
 
-    monadPoint(nw, 0.0, 0.0, 1.0);
-    monadPoint(nw, 1.0, 0.0, 1.0);
-    monadPoint(nw, 0.0, 0.0, 0.0);
+    monadPoint(nw,-0.5,0,0.5);
+    monadPoint(nw,0.5,0,0.5);
+    monadPoint(nw,0.5,0,-0.5);
 
     unmkMonadWindow(nw);
 }
@@ -108,46 +109,41 @@ void planeMod(MonadWindow reference, float lengthX, float lengthY, float lenghtZ
     monadPoint(nw, 0.0, 0.0, 0.0);
 }
 
-void box(MonadWindow reference, float x, float y, float z, int divisions) {
+void cube(MonadWindow reference, int divisions) {
     MonadWindow nw = mkMonadWindow(reference);
-    monadTranslate(nw, -0.5, 0.0, -0.5);
 
-    monadRotate(nw, 180, 1.0, 0.0, 1.0);
-    planeXZ(nw, x, y, z); //face tem que estar ao contrario
+    monadTranslate(nw, 0.0, -0.5, 0.0); 
+    monadRotate(nw, 180, 1.0, 0.0, 0.0);
+    
+    plane(nw); //face tem que estar ao contrario
+    
+    back(nw,reference);
 
-    monadTranslate(nw, 0.0, y, 0.0);
-    planeXZ(nw, x, y, z);
-    monadTranslate(nw, 0.0, -y, 0.0);
+    monadTranslate(nw, 0.0, 0.5, 0.0); 
+    plane(nw);
+    
+    back(nw,reference);
+    monadRotate(nw,90,1,0,0);
+    monadTranslate(nw, 0.0, 0.5, 0.0); 
+    plane(nw);
+    monadTranslate(nw, 0.0, -1.0, 0.0);
+    monadRotate(nw,180,1,0,0);
+    plane(nw);
 
-    planeXY(nw, x, y, z);
+    back(nw,reference);
 
-    monadTranslate(nw, 0.0, 0.0, z); //face tem que estar ao contrario
-    planeXY(nw, x, y, z);
-    monadTranslate(nw, 0.0, 0.0, -z);
-
-    planeYZ(nw, x, y, z);
-
-    monadTranslate(nw, x, 0.0, 0.0); //face tem que estar ao contrario
-    planeYZ(nw, x, y, z);
-    monadTranslate(nw, -x, 0.0, 0.0);
-
-    /*
-     *  nr de divisoes = nr de planos - 1
-
-
-    for(int i = 0; i < divisions - 1; i++) {
-        //planosXZ
-        double novoX = x / (divisions - 1);
-        double novoY = y / (divisions - 1);
-
-        planeXZ(nw, y, z);
-    }*/
-
+    monadRotate(nw,90,0,0,-1);
+    monadTranslate(nw, 0.0, 0.5, 0.0); 
+    plane(nw);
+    monadTranslate(nw, 0.0, -1.0, 0.0);
+    monadRotate(nw,180,0,0,-1);
+    plane(nw);
+    unmkMonadWindow(nw);
 }
 
 int main(int argc, char **argv) {
 	MonadWindow reference = mkMonadWindow();
-    box(reference, 2.0, 2.0, 2.0, 0);
+    cube(reference, 44);
     print_trace(reference,"figure.xml","figure");
 
 	unmkMonadWindow(reference);
