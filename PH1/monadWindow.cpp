@@ -298,7 +298,6 @@ void plataform(MonadWindow reference, int points,float h, float bottomradius, fl
 
 		unmkMonadWindow(db);
 		unmkMonadWindow(ub);
-	//glEnd();
 
 }
 
@@ -353,31 +352,21 @@ void monadHyperplane(MonadWindow reference, int divisions){
 void monadCube(MonadWindow reference, int divisions) {
     MonadWindow nw = mkMonadWindow(reference);
 
-    monadTranslate(nw, 0.0, -0.5, 0.0);
-    monadRotate(nw, 180, 1.0, 0.0, 0.0);
-    monadHyperplane(nw, divisions);
-    
-    back(nw,reference);
-    monadTranslate(nw, 0.0, 0.5, 0.0);
-    monadHyperplane(nw, divisions);
-    
-    back(nw,reference);
-    monadRotate(nw,90,1,0,0);
-    monadTranslate(nw, 0.0, 0.5, 0.0);
-    monadHyperplane(nw, divisions);
+	for(int i = 0; i < 3; i++){
+		switch(i){
+			case 1: monadRotate(nw,90,1,0,0);break;
+			case 2: monadRotate(nw,90,0.0,0.0,-1.0);break;
+		}
 
-    monadTranslate(nw, 0.0, -1.0, 0.0);
-    monadRotate(nw,180,1.0,0.0,0.0);
-    monadHyperplane(nw, divisions);
+    	monadTranslate(nw, 0.0, 0.5, 0.0);
+    	monadHyperplane(nw, divisions);
 
-    back(nw,reference);
-    monadRotate(nw,90,0.0,0.0,-1.0);
-    monadTranslate(nw, 0.0, 0.5, 0.0);
-    monadHyperplane(nw, divisions);
+    	monadTranslate(nw, 0.0, -1.0, 0.0);
+    	monadRotate(nw,180,1.0,0.0,0.0);
+    	monadHyperplane(nw, divisions);
 
-    monadTranslate(nw, 0.0, -1.0, 0.0);
-    monadRotate(nw,180,0,0,-1);
-    monadHyperplane(nw, divisions);
+    	back(nw,reference);
+	}
 
     unmkMonadWindow(nw);
 }
