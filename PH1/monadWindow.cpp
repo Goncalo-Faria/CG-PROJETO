@@ -302,14 +302,14 @@ void plataform(MonadWindow reference, int points,float h, float bottomradius, fl
 
 }
 
-void monadStacker(MonadWindow reference,int points, int stacks, float h, float (*f)(float,float) ){
-	float dh = h/stacks;
+void monadStacker(MonadWindow reference,int points, int stacks, float (*f)(float) ){
+	float dh = 1.0/stacks;
 	float currenth = dh;
-	float f0 = f(0.0,h);
+	float f0 = f(0.0);
 	float f1;
 	MonadWindow nw = mkMonadWindow(reference);
 	for(int i = 0; i < stacks; i++){
-		f1 = f(currenth,h);
+		f1 = f(currenth);
 		plataform(nw, points, dh, f0, f1 );
 		monadTranslate(nw,0.0f,0.0f, -dh);
 		f0 = f1;

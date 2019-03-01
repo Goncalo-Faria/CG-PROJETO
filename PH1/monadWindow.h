@@ -21,7 +21,7 @@ void monadPoint(MonadWindow m, float x, float y, float z);
 
 void monadTriangle(MonadWindow m, float angle, float difs);
 
-void monadStacker(MonadWindow reference,int points, int stacks, float h, float (*f)(float,float) );
+void monadStacker(MonadWindow reference, int points, int stacks, float (*f)(float));
 
 void monadHyperplane(MonadWindow reference, int divisions);
 
