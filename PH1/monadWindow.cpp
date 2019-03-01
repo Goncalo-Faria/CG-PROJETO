@@ -246,14 +246,14 @@ void monadPoint(MonadWindow m, double x, double y, double z){
 
 void monadTriangle(MonadWindow m, double angle, double difs){
 
+	monadPoint(m, cos(angle), 0,sin(angle));
 	monadPoint(m, 0, 0, 0);
-	monadPoint(m, cos(angle), sin(angle),0);
-	monadPoint(m, cos(angle+difs), sin(angle+difs), 0);
+	monadPoint(m, cos(angle+difs), 0,sin(angle+difs));
 	
 }
 
 void plataform(MonadWindow reference, int points,double h, double bottomradius, double topradius){
-	double inner = M_PI/((double)points);
+	double inner = 2 * M_PI/((double)points);
 	MonadWindow db = mkMonadWindow(reference);
 	MonadWindow ub = mkMonadWindow(reference);
 
@@ -372,7 +372,7 @@ void monadCube(MonadWindow reference, int divisions) {
 }
 
 void monadCircle(MonadWindow reference,int points){
-	double inner = M_PI/((double)points);
+	double inner = 2*M_PI/((double)points);
 	MonadWindow mon = mkMonadWindow(reference);
 
     
