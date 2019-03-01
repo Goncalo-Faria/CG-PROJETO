@@ -19,12 +19,16 @@ void monadScale(MonadWindow m, float vx, float vy, float vz );
 
 void monadPoint(MonadWindow m, float x, float y, float z);
 
-void monadTriangle(MonadWindow m, float angle);
+void monadTriangle(MonadWindow m, float angle, float difs);
 
-void stacker(MonadWindow reference,int points, int stacks, float h, float (*f)(float,float) );
+void monadStacker(MonadWindow reference,int points, int stacks, float h, float (*f)(float,float) );
 
-void plataform(MonadWindow reference, int points,float h, float bottomradius, float topradius);
+void monadHyperplane(MonadWindow reference, int divisions);
 
-void print_trace(MonadWindow m, char* filename, char* figure);
+void monadCube(MonadWindow reference, int divisions);
+
+void monadCircle(MonadWindow reference,int points);
+
+void monadTrace(MonadWindow m, char* filename, char* figure);
 
 #endif

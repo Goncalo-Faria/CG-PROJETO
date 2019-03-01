@@ -4,6 +4,8 @@
 #include "monadWindow.h"
 #include "tinyxml2.h"
 
+#define back(X,Y) unmkMonadWindow(X);X = mkMonadWindow(Y)
+
 using namespace tinyxml2; 
 
 typedef struct point {
@@ -36,7 +38,7 @@ void unmkPoint(Point p){
 }
 
 
-void print_trace(MonadWindow m, char* filename, char* figure){
+void monadTrace(MonadWindow m, char* filename, char* figure){
 	int count=0;
 
 	XMLDocument* doc = new XMLDocument();
@@ -238,29 +240,20 @@ void monadPoint(MonadWindow m, float x, float y, float z){
 		for(int j=0; j< 4; j++)
 			a[i] += m->t[i][j] * p[j];
 	}
-	//glColor3f((rand()%10000)/10000.0, (rand()%10000)/10000.0, (rand()%10000)/10000.0);
 
-	//glVertex3f(a[0], a[1], a[2]);
 	monadReference(m, mkPoint(a[0], a[1], a[2]));
-	//printf("monadPoint(reference,%f,%f,%f);\n",a[0], a[1], a[2]);
 }
 
-void monadTriangle(MonadWindow m, float angle){
-		monadPoint(m,0,0,0);
-		monadTranslate(m,1,0,0);	
-		monadPoint(m,0,0,0);
-		monadTranslate(m,-1,0,0);
-		monadRotate(m,180 - angle,0.0f,0.0f,1.0f);
-		monadTranslate(m,1,0,0);	
-		monadPoint(m,0,0,0);
-		monadTranslate(m,-1,0,0);
+void monadTriangle(MonadWindow m, float angle, float difs){
 
+	monadPoint(m, 0, 0, 0);
+	monadPoint(m, cos(angle), sin(angle),0);
+	monadPoint(m, cos(angle+difs), sin(angle+difs), 0);
+	
 }
 
 void plataform(MonadWindow reference, int points,float h, float bottomradius, float topradius){
-	float tangle = (float)((points - 2) * 180);
-	float angle = tangle/points;
-	float otherside = sqrt(2*1.0-2*1.0*cos(180-angle));
+	float inner = M_PI/((float)points);
 	MonadWindow db = mkMonadWindow(reference);
 	MonadWindow ub = mkMonadWindow(reference);
 
@@ -269,11 +262,10 @@ void plataform(MonadWindow reference, int points,float h, float bottomradius, fl
 
 	monadScale(db, bottomradius, bottomradius ,1 );
 	monadScale(ub, topradius,topradius ,1 );
-	//glBegin(GL_TRIANGLES);
 
 		for(int i = 0; i< points;i++){
-			monadTriangle(ub, angle);
-			monadTriangle(db, angle);
+			monadTriangle(ub, i* inner, inner);
+			monadTriangle(db, i* inner, inner);
 		}
 
 		monadRotate(ub, 180, 1.0, 0.0, 0.0);
@@ -296,7 +288,7 @@ void plataform(MonadWindow reference, int points,float h, float bottomradius, fl
 				monadPoint(db,0,0,0);
 
 				monadTranslate(walker,-1.0,0.0,0.0);
-				monadRotate(walker,-(180 - angle),0.0f,0.0f,1.0f);
+				monadRotate(walker,-inner,0.0f,0.0f,1.0f);
 				monadTranslate(walker,1.0,0.0,0.0);
 				monadPoint(walker,0.0,0.0,0);
 			}
@@ -310,7 +302,7 @@ void plataform(MonadWindow reference, int points,float h, float bottomradius, fl
 
 }
 
-void stacker(MonadWindow reference,int points, int stacks, float h, float (*f)(float,float) ){
+void monadStacker(MonadWindow reference,int points, int stacks, float h, float (*f)(float,float) ){
 	float dh = h/stacks;
 	float currenth = dh;
 	float f0 = f(0.0,h);
@@ -325,4 +317,78 @@ void stacker(MonadWindow reference,int points, int stacks, float h, float (*f)(f
 	}
 
 	unmkMonadWindow(nw);
+}
+
+void plane(MonadWindow reference) {
+    MonadWindow nw = mkMonadWindow(reference);
+
+    monadPoint(nw,-0.5,0,-0.5);
+    monadPoint(nw,-0.5,0,0.5);
+    monadPoint(nw,0.5,0,-0.5);
+
+    monadPoint(nw,-0.5,0,0.5);
+    monadPoint(nw,0.5,0,0.5);
+    monadPoint(nw,0.5,0,-0.5);
+
+    unmkMonadWindow(nw);
+}
+
+void monadHyperplane(MonadWindow reference, int divisions){
+    MonadWindow nw = mkMonadWindow(reference);
+
+    monadScale(nw, 1.0/(float)divisions, 1.0/(float)divisions, 1.0/(float)divisions);
+    monadTranslate(nw, -0.5*(divisions-1), 0.0, -0.5*(divisions-1));
+
+    for(int i = 0; i < divisions; i++){
+        for(int j = 0; j < divisions; j++){
+            plane(nw);
+            monadTranslate(nw,1,0.0,0.0);
+        }
+        monadTranslate(nw,-divisions,0.0,1.0);
+    }
+
+    unmkMonadWindow(nw);
+}
+
+void monadCube(MonadWindow reference, int divisions) {
+    MonadWindow nw = mkMonadWindow(reference);
+
+    monadTranslate(nw, 0.0, -0.5, 0.0);
+    monadRotate(nw, 180, 1.0, 0.0, 0.0);
+    monadHyperplane(nw, divisions);
+    
+    back(nw,reference);
+    monadTranslate(nw, 0.0, 0.5, 0.0);
+    monadHyperplane(nw, divisions);
+    
+    back(nw,reference);
+    monadRotate(nw,90,1,0,0);
+    monadTranslate(nw, 0.0, 0.5, 0.0);
+    monadHyperplane(nw, divisions);
+
+    monadTranslate(nw, 0.0, -1.0, 0.0);
+    monadRotate(nw,180,1.0,0.0,0.0);
+    monadHyperplane(nw, divisions);
+
+    back(nw,reference);
+    monadRotate(nw,90,0.0,0.0,-1.0);
+    monadTranslate(nw, 0.0, 0.5, 0.0);
+    monadHyperplane(nw, divisions);
+
+    monadTranslate(nw, 0.0, -1.0, 0.0);
+    monadRotate(nw,180,0,0,-1);
+    monadHyperplane(nw, divisions);
+
+    unmkMonadWindow(nw);
+}
+
+void monadCircle(MonadWindow reference,int points){
+	float inner = M_PI/((float)points);
+	MonadWindow mon = mkMonadWindow(reference);
+
+    
+	for(int i = 0; i< points;i++)
+		monadTriangle(mon,i * inner, inner);
+
+	unmkMonadWindow(mon);
 }
