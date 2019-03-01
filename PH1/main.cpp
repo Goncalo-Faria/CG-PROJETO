@@ -3,15 +3,15 @@
 #include <cstdlib>
 #include "monadWindow.h"
 
-float lin(float dh){
+double lin(double dh){
 	return (1 - dh);
 }
 
-float cuple(float dh){
+double cuple(double dh){
 	return sqrt( (1  - dh*dh) + 1e-15);
 }
 
-void sphere(MonadWindow reference, float radius, int slices, int stacks) {
+void sphere(MonadWindow reference, double radius, int slices, int stacks) {
 	MonadWindow nw = mkMonadWindow(reference);
     monadScale(nw, radius, radius, radius);
 	monadStacker(nw,slices,stacks, cuple);
@@ -20,7 +20,7 @@ void sphere(MonadWindow reference, float radius, int slices, int stacks) {
 	unmkMonadWindow(nw);
 }
 
-void cone(MonadWindow reference, float radius, float height, int slices, int stacks) {
+void cone(MonadWindow reference, double radius, double height, int slices, int stacks) {
     MonadWindow nw = mkMonadWindow(reference);
     monadScale(nw, radius, height, radius);
     monadStacker(nw, slices, stacks, lin);

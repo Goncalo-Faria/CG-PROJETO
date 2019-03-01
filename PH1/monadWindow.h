@@ -9,19 +9,19 @@ MonadWindow mkMonadWindow(MonadWindow mold);
 
 void unmkMonadWindow(MonadWindow m);
 
-void monadRotate(MonadWindow m, float angle, float vx, float vy, float vz);
+void monadRotate(MonadWindow m, double angle, double vx, double vy, double vz);
 
 void monadAgregate(MonadWindow a, MonadWindow b);
 
-void monadTranslate(MonadWindow m, float x, float y, float z);
+void monadTranslate(MonadWindow m, double x, double y, double z);
 
-void monadScale(MonadWindow m, float vx, float vy, float vz );
+void monadScale(MonadWindow m, double vx, double vy, double vz );
 
-void monadPoint(MonadWindow m, float x, float y, float z);
+void monadPoint(MonadWindow m, double x, double y, double z);
 
-void monadTriangle(MonadWindow m, float angle, float difs);
+void monadTriangle(MonadWindow m, double angle, double difs);
 
-void monadStacker(MonadWindow reference, int points, int stacks, float (*f)(float));
+void monadStacker(MonadWindow reference, int points, int stacks, double (*f)(double));
 
 void monadHyperplane(MonadWindow reference, int divisions);
 
