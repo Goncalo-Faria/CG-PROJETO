@@ -55,34 +55,61 @@ void plane(MonadWindow reference) {
     unmkMonadWindow(nw);
 }
 
-void cube(MonadWindow reference, int divisions) {
+void hyperplane(MonadWindow reference, int divisions){
+    MonadWindow nw = mkMonadWindow(reference);
+
+    monadScale(nw, 1.0/(float)divisions, 1.0/(float)divisions, 1.0/(float)divisions);
+    monadTranslate(nw, -0.5*(divisions-1), 0.0, -0.5*(divisions-1));
+
+    for(int i = 0; i < divisions; i++){
+        plane(nw);
+        for(int j = 0; j < (divisions - 1); j++){
+            monadTranslate(nw,1,0.0,0.0);
+            plane(nw);
+        }
+        monadTranslate(nw,-divisions+1,0.0,1.0);
+    }
+
+    unmkMonadWindow(nw);
+}
+
+void cubeCube(MonadWindow reference, int divisions) {
     MonadWindow nw = mkMonadWindow(reference);
 
     monadTranslate(nw, 0.0, -0.5, 0.0);
     monadRotate(nw, 180, 1.0, 0.0, 0.0);
-    plane(nw);
+    hyperplane(nw, divisions);
     
     back(nw,reference);
     monadTranslate(nw, 0.0, 0.5, 0.0);
-    plane(nw);
+    hyperplane(nw, divisions);
     
     back(nw,reference);
     monadRotate(nw,90,1,0,0);
     monadTranslate(nw, 0.0, 0.5, 0.0);
-    plane(nw);
+    hyperplane(nw, divisions);
 
     monadTranslate(nw, 0.0, -1.0, 0.0);
-    monadRotate(nw,180,1,0,0);
-    plane(nw);
+    monadRotate(nw,180,1.0,0.0,0.0);
+    hyperplane(nw, divisions);
 
     back(nw,reference);
-    monadRotate(nw,90,0,0,-1);
+    monadRotate(nw,90,0.0,0.0,-1.0);
     monadTranslate(nw, 0.0, 0.5, 0.0);
-    plane(nw);
+    hyperplane(nw, divisions);
 
     monadTranslate(nw, 0.0, -1.0, 0.0);
     monadRotate(nw,180,0,0,-1);
-    plane(nw);
+    hyperplane(nw, divisions);
+
+    unmkMonadWindow(nw);
+}
+
+void box(MonadWindow reference, int dx, int dy, int dz, int divisions) {
+    MonadWindow nw = mkMonadWindow(reference);
+
+    monadScale(reference,dx,dy,dz);
+    cubeCube(reference,divisions);
 
     unmkMonadWindow(nw);
 }
@@ -90,9 +117,8 @@ void cube(MonadWindow reference, int divisions) {
 int main(int argc, char **argv) {
 	MonadWindow reference = mkMonadWindow();
 
-	monadScale(reference, 2.0,2.0,2.0);
-    cube(reference, 44);
-    
+    box(reference, 2.0,2.0,2.0,2);
+
     print_trace(reference,"figure.xml","figure");
 
 	unmkMonadWindow(reference);
