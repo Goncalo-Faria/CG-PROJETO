@@ -37,7 +37,6 @@ void unmkPoint(Point p){
 	free(p);
 }
 
-
 void frameTrace(CoordinateFrame m, char* filename, char* figure){
 	int count=0;
 
@@ -183,7 +182,6 @@ void frameAgregate(CoordinateFrame a, CoordinateFrame b){
 }
 
 void frameRotate(CoordinateFrame m, double angle, double vx, double vy, double vz){
-
 	double rx = vx*angle;
 	double ry = vy*angle;
 	double rz = vz*angle;
@@ -199,8 +197,6 @@ void frameRotate(CoordinateFrame m, double angle, double vx, double vy, double v
 	tmp = mkCoordinateFrameRz(rz);
 	frameAgregate(m,tmp);
 	unmkCoordinateFrame(tmp);
-
-
 }
 
 void frameTranslate(CoordinateFrame m, double x, double y, double z){
@@ -245,11 +241,9 @@ void framePoint(CoordinateFrame m, double x, double y, double z){
 }
 
 void frameTriangle(CoordinateFrame m, double angle, double difs){
-
 	framePoint(m, cos(angle), 0,sin(angle));
 	framePoint(m, 0, 0, 0);
 	framePoint(m, cos(angle+difs), 0,sin(angle+difs));
-	
 }
 
 void plataform(CoordinateFrame reference, int points, double bottomradius, double topradius, int upface, int downface){
@@ -271,7 +265,6 @@ void plataform(CoordinateFrame reference, int points, double bottomradius, doubl
 	if (downface)
 		frameCircle(db, points);
 	
-	
 	frameRotate(db, 180, 1.0, 0.0, 0.0);
 		
 	for( int i = 0; i<points; i++ ){
@@ -283,12 +276,11 @@ void plataform(CoordinateFrame reference, int points, double bottomradius, doubl
 		framePoint(db,cos((i+1)* rinner),0.0,sin((i+1)* rinner));
 		framePoint(ub,cos(i* rinner),0.0,sin(i* rinner));
 		framePoint(ub,cos((i+1)*rinner),0.0,sin((i+1)*rinner));			
-			
+		
 	}
 	
 	unmkCoordinateFrame(db);
 	unmkCoordinateFrame(ub);
-
 }
 
 void frameStacker(CoordinateFrame reference,int points, int stacks, double (*f)(double) ){
@@ -298,6 +290,7 @@ void frameStacker(CoordinateFrame reference,int points, int stacks, double (*f)(
 	double f1;
 	CoordinateFrame nw = mkCoordinateFrame(reference);
 	frameScale(nw,1.0f,dh,1.0f);
+	
 	for(int i = 0; i < stacks; i++){
 		f1 = f(currenth);
 		plataform(nw, points, f0, f1 ,(i==0),(i == stacks-1));
