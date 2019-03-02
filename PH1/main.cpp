@@ -11,6 +11,10 @@ double cuple(double dh){
 	return sqrt( (1  - dh*dh) + 1e-15);
 }
 
+double cil(double dh){
+	return 1;
+}
+
 void sphere(MonadWindow reference, double radius, int slices, int stacks) {
 	MonadWindow nw = mkMonadWindow(reference);
     monadScale(nw, radius, radius, radius);
@@ -40,7 +44,9 @@ int main(int argc, char **argv) {
 	MonadWindow reference = mkMonadWindow();
 
     //box(reference, 2.0,2.0,2.0,2);
-    cone(reference, 1.0,2.0,8,3);
+
+    monadStacker(reference,100, 100, cil);
+    //monadCircle(reference,6);
 
     monadTrace(reference,"figure.xml","figure");
 

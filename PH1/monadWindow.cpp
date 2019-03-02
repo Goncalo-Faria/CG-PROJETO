@@ -252,50 +252,48 @@ void monadTriangle(MonadWindow m, double angle, double difs){
 	
 }
 
-void plataform(MonadWindow reference, int points,double h, double bottomradius, double topradius){
-	double inner = 2 * M_PI/((double)points);
+void plataform(MonadWindow reference, int points, double bottomradius, double topradius){
+	double ginner = 180 * 2 /((double)points);
+	double rinner = 2 * M_PI /((double)points);
+
 	MonadWindow db = mkMonadWindow(reference);
 	MonadWindow ub = mkMonadWindow(reference);
 
-	monadTranslate(ub, 0.0, 0.0, -h);
-	monadRotate(ub, 180, 1.0, 0.0, 0.0);
+	//monadScale(ub, 0.0, , 0.0 );
+	monadTranslate(ub, 0.0, 1.0, 0.0);
+	monadRotate(db, 180, 1.0, 0.0, 0.0);
 
-	monadScale(db, bottomradius, bottomradius ,1 );
-	monadScale(ub, topradius,topradius ,1 );
+	monadScale(db, bottomradius, 0.0, bottomradius);
+	monadScale(ub, topradius, 0.0, topradius);
 
 		for(int i = 0; i< points;i++){
-			monadTriangle(ub, i* inner, inner);
-			monadTriangle(db, i* inner, inner);
+			monadTriangle(ub, i* rinner, rinner);
+			monadTriangle(db, i* rinner, rinner);
 		}
 
-		monadRotate(ub, 180, 1.0, 0.0, 0.0);
+		monadRotate(db, 180, 1.0, 0.0, 0.0);
+
 		monadTranslate(ub,1.0,0.0,0.0);
 		monadTranslate(db,1.0,0.0,0.0);
 
 		
 		for( int i = 0; i<points; i++ ){
-			
 			MonadWindow walker;
-			
-
 			for(int j = 0; j< 2; j++ ){
 				if( j%2 == 0 ){
 					walker = ub;
 				}else{
 					walker = db;
 				}
-				monadPoint(ub,0,0,0);
 				monadPoint(db,0,0,0);
+				monadPoint(ub,0,0,0);
 
 				monadTranslate(walker,-1.0,0.0,0.0);
-				monadRotate(walker,-inner,0.0f,0.0f,1.0f);
+				monadRotate(walker,-ginner,0.0f,1.0f,0.0f);
 				monadTranslate(walker,1.0,0.0,0.0);
 				monadPoint(walker,0.0,0.0,0);
 			}
-
 		}
-		
-
 		unmkMonadWindow(db);
 		unmkMonadWindow(ub);
 
@@ -307,10 +305,11 @@ void monadStacker(MonadWindow reference,int points, int stacks, double (*f)(doub
 	double f0 = f(0.0);
 	double f1;
 	MonadWindow nw = mkMonadWindow(reference);
+	monadScale(nw,1.0f,dh,1.0f);
 	for(int i = 0; i < stacks; i++){
 		f1 = f(currenth);
-		plataform(nw, points, dh, f0, f1 );
-		monadTranslate(nw,0.0f,0.0f, -dh);
+		plataform(nw, points, f0, f1 );
+		monadTranslate(nw,0.0f,1.0f,0.0f);
 		f0 = f1;
 		currenth += dh;
 	}

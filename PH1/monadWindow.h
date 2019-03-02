@@ -31,4 +31,5 @@ void monadCircle(MonadWindow reference,int points);
 
 void monadTrace(MonadWindow m, char* filename, char* figure);
 
+
 #endif
