@@ -1,7 +1,7 @@
 #include <math.h>
 #include <cstdio>
 #include <cstdlib>
-#include "monadWindow.h"
+#include "coordinateFrame.h"
 
 double lin(double dh){
 	return (1 - dh);
@@ -15,41 +15,40 @@ double cil(double dh){
 	return 1;
 }
 
-void sphere(MonadWindow reference, double radius, int slices, int stacks) {
-	MonadWindow nw = mkMonadWindow(reference);
-    monadScale(nw, radius, radius, radius);
-	monadStacker(nw,slices,stacks, cuple);
-	monadRotate(nw,180,1.0,0.0,0.0);
-	monadStacker(nw, slices,stacks, cuple);
-	unmkMonadWindow(nw);
+void sphere(CoordinateFrame reference, double radius, int slices, int stacks) {
+	CoordinateFrame nw = mkCoordinateFrame(reference);
+    frameScale(nw, radius, radius, radius);
+	frameStacker(nw,slices,stacks, cuple);
+	frameRotate(nw,180,1.0,0.0,0.0);
+	frameStacker(nw, slices,stacks, cuple);
+	unmkCoordinateFrame(nw);
+}
+void cone(CoordinateFrame reference, double radius, double height, int slices, int stacks) {
+    CoordinateFrame nw = mkCoordinateFrame(reference);
+    frameScale(nw, radius, height, radius);
+    frameStacker(nw, slices, stacks, lin);
+    unmkCoordinateFrame(nw);
 }
 
-void cone(MonadWindow reference, double radius, double height, int slices, int stacks) {
-    MonadWindow nw = mkMonadWindow(reference);
-    monadScale(nw, radius, height, radius);
-    monadStacker(nw, slices, stacks, lin);
-    unmkMonadWindow(nw);
-}
+void box(CoordinateFrame reference, int dx, int dy, int dz, int divisions) {
+    CoordinateFrame nw = mkCoordinateFrame(reference);
 
-void box(MonadWindow reference, int dx, int dy, int dz, int divisions) {
-    MonadWindow nw = mkMonadWindow(reference);
+    frameScale(reference,dx,dy,dz);
+    frameCube(reference,divisions);
 
-    monadScale(reference,dx,dy,dz);
-    monadCube(reference,divisions);
-
-    unmkMonadWindow(nw);
+    unmkCoordinateFrame(nw);
 }
 
 int main(int argc, char **argv) {
-	MonadWindow reference = mkMonadWindow();
+	CoordinateFrame reference = mkCoordinateFrame();
 
     //box(reference, 2.0,2.0,2.0,2);
 
-    monadStacker(reference,100, 100, cil);
-    //monadCircle(reference,6);
+    frameStacker(reference,3, 1, cil);
+    //frameCircle(reference,6);
 
-    monadTrace(reference,"figure.xml","figure");
+    frameTrace(reference,"figure.xml","figure");
 
-	unmkMonadWindow(reference);
+	unmkCoordinateFrame(reference);
 	return 1;
 }
