@@ -252,20 +252,52 @@ void frameTriangle(CoordinateFrame m, double angle, double difs){
 	
 }
 
+<<<<<<< HEAD
+void plataform(CoordinateFrame reference, int points, double bottomradius, double topradius, int upface, int downface){
+=======
 void plataform(CoordinateFrame reference, int points, double bottomradius, double topradius){
+>>>>>>> 27552f780c65037937daa15324c445efce124fdf
 	double ginner = 180 * 2 /((double)points);
 	double rinner = 2 * M_PI /((double)points);
 
 	CoordinateFrame db = mkCoordinateFrame(reference);
 	CoordinateFrame ub = mkCoordinateFrame(reference);
 
+<<<<<<< HEAD
+=======
 	//frameScale(ub, 0.0, , 0.0 );
+>>>>>>> 27552f780c65037937daa15324c445efce124fdf
 	frameTranslate(ub, 0.0, 1.0, 0.0);
 	frameRotate(db, 180, 1.0, 0.0, 0.0);
 
 	frameScale(db, bottomradius, 0.0, bottomradius);
 	frameScale(ub, topradius, 0.0, topradius);
 
+<<<<<<< HEAD
+	if (upface)
+		frameCircle(ub, points);
+
+	if (downface)
+		frameCircle(db, points);
+	
+	
+	frameRotate(db, 180, 1.0, 0.0, 0.0);
+		
+	for( int i = 0; i<points; i++ ){
+
+		framePoint(db,cos(i* rinner),0.0,sin(i* rinner));
+		framePoint(ub,cos(i* rinner),0.0,sin(i* rinner));
+		framePoint(db,cos((i+1)*rinner),0.0,sin((i+1)*rinner));
+
+		framePoint(db,cos((i+1)* rinner),0.0,sin((i+1)* rinner));
+		framePoint(ub,cos(i* rinner),0.0,sin(i* rinner));
+		framePoint(ub,cos((i+1)*rinner),0.0,sin((i+1)*rinner));			
+			
+	}
+	
+	unmkCoordinateFrame(db);
+	unmkCoordinateFrame(ub);
+=======
 		for(int i = 0; i< points;i++){
 			frameTriangle(ub, i* rinner, rinner);
 			frameTriangle(db, i* rinner, rinner);
@@ -286,6 +318,7 @@ void plataform(CoordinateFrame reference, int points, double bottomradius, doubl
 		}
 		unmkCoordinateFrame(db);
 		unmkCoordinateFrame(ub);
+>>>>>>> 27552f780c65037937daa15324c445efce124fdf
 
 }
 
@@ -298,7 +331,11 @@ void frameStacker(CoordinateFrame reference,int points, int stacks, double (*f)(
 	frameScale(nw,1.0f,dh,1.0f);
 	for(int i = 0; i < stacks; i++){
 		f1 = f(currenth);
+<<<<<<< HEAD
+		plataform(nw, points, f0, f1 ,(i==0),(i == stacks-1));
+=======
 		plataform(nw, points, f0, f1 );
+>>>>>>> 27552f780c65037937daa15324c445efce124fdf
 		frameTranslate(nw,0.0f,1.0f,0.0f);
 		f0 = f1;
 		currenth += dh;
