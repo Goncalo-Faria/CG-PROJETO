@@ -44,7 +44,8 @@ int main(int argc, char **argv) {
 
     //box(reference, 2.0,2.0,2.0,2);
 
-    frameStacker(reference,3, 1, cil);
+    //frameStacker(reference,3, 3, cuple);
+    sphere(reference,1.0,10,10);
     //frameCircle(reference,6);
 
     frameTrace(reference,"figure.xml","figure");
