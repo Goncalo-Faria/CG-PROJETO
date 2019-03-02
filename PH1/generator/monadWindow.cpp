@@ -1,13 +1,15 @@
+#define _USE_MATH_DEFINES
+
 #include <math.h>
 #include <cstdio>
 #include <cstdlib>
 #include "monadWindow.h"
 #include "tinyxml2.h"
 
-using namespace tinyxml2; 
+using namespace tinyxml2;
 
 typedef struct point {
-	float p[3];
+	double p[3];
 } *Point;
 
 typedef struct l {
@@ -15,16 +17,16 @@ typedef struct l {
 	struct l * px;
 } *L;
 
-typedef struct monad { 
-	float t[4][4];
+typedef struct monad {
+	double t[4][4];
 	L back;
 	L front;
 	struct monad * ref;
 } *MonadWindow;
 
 
-Point mkPoint(float x, float y, float z){
-	Point m = (Point) malloc( sizeof(struct point) );
+Point mkPoint(double x, double y, double z){
+	auto m = (Point) malloc( sizeof(struct point) );
 	m->p[0] = x;
 	m->p[1] = y;
 	m->p[2] = z;
@@ -36,24 +38,24 @@ void unmkPoint(Point p){
 }
 
 
-void print_trace(MonadWindow m, char* filename, char* figure){
+void print_trace(MonadWindow m, const char* filename, char* figure){
 	int count=0;
 
-	XMLDocument* doc = new XMLDocument();
+	auto * doc = new XMLDocument();
 	XMLNode* major = doc->InsertEndChild( doc->NewElement(figure) );
 	XMLElement* triangle;
 	XMLElement *point;
-	XMLNode* ntraingle, *npoint;
-	XMLText* text;
+	XMLNode* nTriangle = nullptr;
+
 	for(L cur = m->front; cur ; cur = cur->px){
 
 		if(!(count%3) ){
 			triangle = doc->NewElement( "triangle" );
-			ntraingle = major->InsertEndChild( triangle );
+			nTriangle = major->InsertEndChild( triangle );
 		}
 				
 		point = doc->NewElement( "point" );
-		npoint = ntraingle->InsertEndChild( point );
+		nTriangle->InsertEndChild( point );
 
 		point->SetAttribute("x",cur->value->p[0]);
 		point->SetAttribute("y",cur->value->p[1]);
@@ -70,14 +72,13 @@ void print_trace(MonadWindow m, char* filename, char* figure){
 
 
 MonadWindow mkMonadWindow(){
-	MonadWindow m = (MonadWindow) malloc( sizeof(struct monad) );
+	auto m = (MonadWindow) malloc( sizeof(struct monad) );
 	for(int i = 0; i< 4; i++)
 		for( int j=0; j<4; j++)
 			m->t[i][j] = (i==j);
 	
-	m->ref = NULL;
-	m->back = NULL;
-	m->front = NULL;
+	m->ref = nullptr;
+	m->back = m->front = nullptr;
 
 	return m;
 }
@@ -93,22 +94,22 @@ void unmkMonadWindow(MonadWindow m){
 }
 
 MonadWindow mkMonadWindow(MonadWindow mold){
-	MonadWindow m = (MonadWindow) malloc( sizeof(struct monad) );
+	auto m = (MonadWindow) malloc( sizeof(struct monad) );
 	for(int i = 0; i< 4; i++)
 		for( int j=0; j<4; j++)
 			m->t[i][j] = mold->t[i][j];
 	
 	m->ref = mold;
-	m->back = m->front = NULL;
+	m->back = m->front = nullptr;
 
 	return m;
 }
 
 void monadReference(MonadWindow  m, Point p){
 	if( !m->ref ){
-		L n =  (L) malloc( sizeof(struct l) );
+		L n = (L) malloc( sizeof(struct l) );
 		n->value = p;
-		n->px = NULL;
+		n->px = nullptr;
 
 		if( !m->back ){
 			m->back = m->front = n;
@@ -123,10 +124,10 @@ void monadReference(MonadWindow  m, Point p){
 	}	
 }
 
-MonadWindow mkMonadWindowRx(float angle){
+MonadWindow mkMonadWindowRx(double angle){
 	MonadWindow m = mkMonadWindow();
 
-	float rad = (M_PI/180.0)*angle;
+	double rad = (M_PI/180.0)*angle;
 
 	m->t[1][1] = cos(rad);
 	m->t[1][2] = -sin(rad);
@@ -136,10 +137,10 @@ MonadWindow mkMonadWindowRx(float angle){
 	return m;
 }
 
-MonadWindow mkMonadWindowRy(float angle){
+MonadWindow mkMonadWindowRy(double angle){
 	MonadWindow m = mkMonadWindow();
 
-	float rad = (M_PI/180.0)*angle;
+	double rad = (M_PI/180.0)*angle;
 
 	m->t[0][0] = cos(rad);
 	m->t[0][2] = sin(rad);
@@ -149,10 +150,10 @@ MonadWindow mkMonadWindowRy(float angle){
 	return m;
 }
 
-MonadWindow mkMonadWindowRz(float angle){
+MonadWindow mkMonadWindowRz(double angle){
 	MonadWindow m = mkMonadWindow();
 
-	float rad = (M_PI/180.0)*angle;
+	double rad = (M_PI/180.0)*angle;
 
 	m->t[0][0] = cos(rad);
 	m->t[0][1] = -sin(rad);
@@ -163,7 +164,7 @@ MonadWindow mkMonadWindowRz(float angle){
 }
 
 void monadAgregate(MonadWindow a, MonadWindow b){
-	float result[4][4];
+	double result[4][4];
 
 	for( int i = 0; i<4; i++ )
 		for(int j = 0;j<4; j++)
@@ -180,11 +181,11 @@ void monadAgregate(MonadWindow a, MonadWindow b){
 	
 }
 
-void monadRotate(MonadWindow m, float angle, float vx, float vy, float vz){
+void monadRotate(MonadWindow m, double angle, double vx, double vy, double vz){
 
-	float rx = vx*angle;
-	float ry = vy*angle;
-	float rz = vz*angle;
+	double rx = vx*angle;
+	double ry = vy*angle;
+	double rz = vz*angle;
 
 	MonadWindow tmp = mkMonadWindowRx(rx);
 	monadAgregate(m,tmp);
@@ -201,7 +202,7 @@ void monadRotate(MonadWindow m, float angle, float vx, float vy, float vz){
 
 }
 
-void monadTranslate(MonadWindow m, float x, float y, float z){
+void monadTranslate(MonadWindow m, double x, double y, double z){
 	MonadWindow mt = mkMonadWindow();
 	
 	mt->t[0][3] = x;
@@ -213,7 +214,7 @@ void monadTranslate(MonadWindow m, float x, float y, float z){
 	unmkMonadWindow(mt);
 }
 
-void monadScale(MonadWindow m, float vx, float vy, float vz ){
+void monadScale(MonadWindow m, double vx, double vy, double vz ){
 	MonadWindow mt = mkMonadWindow();
 	
 	mt->t[0][0] = vx;
@@ -225,9 +226,9 @@ void monadScale(MonadWindow m, float vx, float vy, float vz ){
 	unmkMonadWindow(mt);
 }
 
-void monadPoint(MonadWindow m, float x, float y, float z){
-	float p[4];
-	float a[4];
+void monadPoint(MonadWindow m, double x, double y, double z){
+	double p[4];
+	double a[4];
 
 	p[0] = x;
 	p[1] = y;
@@ -238,14 +239,10 @@ void monadPoint(MonadWindow m, float x, float y, float z){
 		for(int j=0; j< 4; j++)
 			a[i] += m->t[i][j] * p[j];
 	}
-	//glColor3f((rand()%10000)/10000.0, (rand()%10000)/10000.0, (rand()%10000)/10000.0);
-
-	//glVertex3f(a[0], a[1], a[2]);
 	monadReference(m, mkPoint(a[0], a[1], a[2]));
-	//printf("monadPoint(reference,%f,%f,%f);\n",a[0], a[1], a[2]);
 }
 
-void monadTriangle(MonadWindow m, float angle){
+void monadTriangle(MonadWindow m, double angle){
 		monadPoint(m,0,0,0);
 		monadTranslate(m,1,0,0);	
 		monadPoint(m,0,0,0);
@@ -257,68 +254,64 @@ void monadTriangle(MonadWindow m, float angle){
 
 }
 
-void plataform(MonadWindow reference, int points,float h, float bottomradius, float topradius){
-	float tangle = (float)((points - 2) * 180);
-	float angle = tangle/points;
-	float otherside = sqrt(2*1.0-2*1.0*cos(180-angle));
+void platform(MonadWindow reference, int points,double h, double bottomRadius, double topRadius){
+	double tangle = (double)((points - 2) * 180);
+	double angle = tangle/points;
 	MonadWindow db = mkMonadWindow(reference);
 	MonadWindow ub = mkMonadWindow(reference);
 
 	monadTranslate(ub, 0.0, 0.0, -h);
 	monadRotate(ub, 180, 1.0, 0.0, 0.0);
 
-	monadScale(db, bottomradius, bottomradius ,1 );
-	monadScale(ub, topradius,topradius ,1 );
-	//glBegin(GL_TRIANGLES);
+	monadScale(db, bottomRadius, bottomRadius ,1 );
+	monadScale(ub, topRadius,topRadius ,1 );
 
-		for(int i = 0; i< points;i++){
-			monadTriangle(ub, angle);
-			monadTriangle(db, angle);
-		}
+	for(int i = 0; i< points;i++){
+		monadTriangle(ub, angle);
+		monadTriangle(db, angle);
+	}
 
-		monadRotate(ub, 180, 1.0, 0.0, 0.0);
-		monadTranslate(ub,1.0,0.0,0.0);
-		monadTranslate(db,1.0,0.0,0.0);
+	monadRotate(ub, 180, 1.0, 0.0, 0.0);
+	monadTranslate(ub,1.0,0.0,0.0);
+	monadTranslate(db,1.0,0.0,0.0);
 
-		
-		for( int i = 0; i<points; i++ ){
-			
-			MonadWindow walker;
-			
 
-			for(int j = 0; j< 2; j++ ){
-				if( j%2 == 0 ){
-					walker = ub;
-				}else{
-					walker = db;
-				}
-				monadPoint(ub,0,0,0);
-				monadPoint(db,0,0,0);
+	for( int i = 0; i<points; i++ ){
 
-				monadTranslate(walker,-1.0,0.0,0.0);
-				monadRotate(walker,-(180 - angle),0.0f,0.0f,1.0f);
-				monadTranslate(walker,1.0,0.0,0.0);
-				monadPoint(walker,0.0,0.0,0);
+		MonadWindow walker;
+
+
+		for(int j = 0; j< 2; j++ ){
+			if( j%2 == 0 ){
+				walker = ub;
+			}else{
+				walker = db;
 			}
+			monadPoint(ub,0,0,0);
+			monadPoint(db,0,0,0);
 
+			monadTranslate(walker,-1.0,0.0,0.0);
+			monadRotate(walker,-(180 - angle),0.0f,0.0f,1.0f);
+			monadTranslate(walker,1.0,0.0,0.0);
+			monadPoint(walker,0.0,0.0,0);
 		}
-		
 
-		unmkMonadWindow(db);
-		unmkMonadWindow(ub);
-	//glEnd();
+	}
 
+
+	unmkMonadWindow(db);
+	unmkMonadWindow(ub);
 }
 
-void stacker(MonadWindow reference,int points, int stacks, float h, float (*f)(float,float) ){
-	float dh = h/stacks;
-	float currenth = dh;
-	float f0 = f(0.0,h);
-	float f1;
+void stacker(MonadWindow reference,int points, int stacks, double h, double (*f)(double,double) ){
+	double dh = h/stacks;
+	double currenth = dh;
+	double f0 = f(0.0,h);
+	double f1;
 	MonadWindow nw = mkMonadWindow(reference);
 	for(int i = 0; i < stacks; i++){
 		f1 = f(currenth,h);
-		plataform(nw, points, dh, f0, f1 );
+		platform(nw, points, dh, f0, f1 );
 		monadTranslate(nw,0.0f,0.0f, -dh);
 		f0 = f1;
 		currenth += dh;
