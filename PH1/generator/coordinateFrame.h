@@ -25,7 +25,7 @@ void frameHyperplane(CoordinateFrame reference, int divisions);
 
 void frameCube(CoordinateFrame reference, int divisions);
 
-void frameCircle(CoordinateFrame reference,int points);
+void frameRegularPolygon(CoordinateFrame reference,int points);
 
 void frameTrace(CoordinateFrame m, char* filename, char* figure);
 

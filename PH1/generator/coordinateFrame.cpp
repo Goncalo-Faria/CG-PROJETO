@@ -260,10 +260,10 @@ void plataform(CoordinateFrame reference, int points, double bottomradius, doubl
 	frameScale(ub, topradius, 0.0, topradius);
 
 	if (upface)
-		frameCircle(ub, points);
+		frameRegularPolygon(ub, points);
 
 	if (downface)
-		frameCircle(db, points);
+		frameRegularPolygon(db, points);
 	
 	frameRotate(db, 180, 1.0, 0.0, 0.0);
 		
@@ -355,7 +355,7 @@ void frameCube(CoordinateFrame reference, int divisions) {
     unmkCoordinateFrame(nw);
 }
 
-void frameCircle(CoordinateFrame reference,int points){
+void frameRegularPolygon(CoordinateFrame reference,int points){
 	double inner = 2*M_PI/((double)points);
 	CoordinateFrame mon = mkCoordinateFrame(reference);
 

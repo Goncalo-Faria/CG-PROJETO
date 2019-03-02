@@ -18,6 +18,14 @@ double cil(double dh){
 	return 1;
 }
 
+double smartshephere(double dh){
+	if( dh <= 0.5)
+		return sqrt( 1 - pow(1- 2*dh,2));
+	else
+		return sqrt( 1 - pow(2*dh - 1,2));
+}
+
+/* legacy
 void sphere(CoordinateFrame reference, double radius, int slices, int stacks) {
 	CoordinateFrame nw = mkCoordinateFrame(reference);
     frameScale(nw, radius, radius, radius);
@@ -26,6 +34,16 @@ void sphere(CoordinateFrame reference, double radius, int slices, int stacks) {
 	frameStacker(nw, slices,stacks, cuple);
 	unmkCoordinateFrame(nw);
 }
+*/
+
+void sphere(CoordinateFrame reference, double radius, int slices, int stacks) {
+	CoordinateFrame nw = mkCoordinateFrame(reference);
+    frameScale(nw, radius, 2*radius, radius);
+	frameStacker(nw,slices,stacks, smartshephere);
+	unmkCoordinateFrame(nw);
+}
+
+
 void cone(CoordinateFrame reference, double radius, double height, int slices, int stacks) {
     CoordinateFrame nw = mkCoordinateFrame(reference);
     frameScale(nw, radius, height, radius);
@@ -52,11 +70,7 @@ int main(int argc, char **argv) {
 	if(argc == 1) notEnoughArguments();
 
 	CoordinateFrame reference = mkCoordinateFrame();
-<<<<<<< HEAD
 	char * filename = "filename.xml";
-=======
-	const char * filename = "filename.xml";
->>>>>>> d39bf39cede81f7f5fb8a3cc2a8165802e5e87be
 
 	if(strcmp(argv[1], "plane") == 0) {
 	    frameHyperplane(reference,1);
@@ -74,7 +88,7 @@ int main(int argc, char **argv) {
     } else if(strcmp(argv[1], "sphere") == 0) {
 		if(argc < 5) notEnoughArguments();
 		//radius, slices, stacks
-		sphere(reference, atoi(argv[2]), atoi(argv[3]), atoi(argv[4]));
+		sphere(reference, atof(argv[2]), atoi(argv[3]), atoi(argv[4]));
 		filename = argv[5];
 	} else if(strcmp(argv[1], "cone") == 0) {
 		if(argc < 6) notEnoughArguments();
