@@ -11,8 +11,6 @@ void unmkCoordinateFrame(CoordinateFrame m);
 
 void frameRotate(CoordinateFrame m, double angle, double vx, double vy, double vz);
 
-void frameAgregate(CoordinateFrame a, CoordinateFrame b);
-
 void frameTranslate(CoordinateFrame m, double x, double y, double z);
 
 void frameScale(CoordinateFrame m, double vx, double vy, double vz );
@@ -27,7 +25,7 @@ void frameHyperplane(CoordinateFrame reference, int divisions);
 
 void frameCube(CoordinateFrame reference, int divisions);
 
-void frameCircle(CoordinateFrame reference,int points);
+void frameRegularPolygon(CoordinateFrame reference,int points);
 
 void frameTrace(CoordinateFrame m, char* filename, char* figure);
 

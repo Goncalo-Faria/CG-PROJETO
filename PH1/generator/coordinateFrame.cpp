@@ -260,10 +260,10 @@ void plataform(CoordinateFrame reference, int points, double bottomradius, doubl
 	frameScale(ub, topradius, 0.0, topradius);
 
 	if (upface)
-		frameCircle(ub, points);
+		frameRegularPolygon(ub, points);
 
 	if (downface)
-		frameCircle(db, points);
+		frameRegularPolygon(db, points);
 	
 	frameRotate(db, 180, 1.0, 0.0, 0.0);
 		
@@ -290,7 +290,6 @@ void frameStacker(CoordinateFrame reference,int points, int stacks, double (*f)(
 	double f1;
 	CoordinateFrame nw = mkCoordinateFrame(reference);
 	frameScale(nw,1.0f,dh,1.0f);
-	
 	for(int i = 0; i < stacks; i++){
 		f1 = f(currenth);
 		plataform(nw, points, f0, f1 ,(i==0),(i == stacks-1));
@@ -356,7 +355,7 @@ void frameCube(CoordinateFrame reference, int divisions) {
     unmkCoordinateFrame(nw);
 }
 
-void frameCircle(CoordinateFrame reference,int points){
+void frameRegularPolygon(CoordinateFrame reference,int points){
 	double inner = 2*M_PI/((double)points);
 	CoordinateFrame mon = mkCoordinateFrame(reference);
 
