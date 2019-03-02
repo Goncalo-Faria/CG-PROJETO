@@ -31,5 +31,4 @@ void frameCircle(CoordinateFrame reference,int points);
 
 void frameTrace(CoordinateFrame m, char* filename, char* figure);
 
-
 #endif
