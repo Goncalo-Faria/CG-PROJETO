@@ -272,24 +272,17 @@ void plataform(CoordinateFrame reference, int points, double bottomradius, doubl
 		}
 
 		frameRotate(db, 180, 1.0, 0.0, 0.0);
-
-		//frameTranslate(ub,1.0,0.0,0.0);
-		//frameTranslate(db,1.0,0.0,0.0);
-
 		
 		for( int i = 0; i<points; i++ ){
-			CoordinateFrame walker;
-			for(int j = 0; j< 2; j++ ){
-				if( j%2 == 0 ){
-					walker = ub;
-				}else{
-					walker = db;
-				}
-				framePoint(db,cos(i* rinner),0.0,sin(i* rinner));
-				framePoint(ub,cos(i* rinner),0.0,sin(i* rinner));
 
-				framePoint(walker,cos((i+1)*rinner),0.0,sin((i+1)*rinner));
-			}
+			framePoint(db,cos(i* rinner),0.0,sin(i* rinner));
+			framePoint(ub,cos(i* rinner),0.0,sin(i* rinner));
+			framePoint(db,cos((i+1)*rinner),0.0,sin((i+1)*rinner));
+
+			framePoint(db,cos((i+1)* rinner),0.0,sin((i+1)* rinner));
+			framePoint(ub,cos(i* rinner),0.0,sin(i* rinner));
+			framePoint(ub,cos((i+1)*rinner),0.0,sin((i+1)*rinner));			
+			
 		}
 		unmkCoordinateFrame(db);
 		unmkCoordinateFrame(ub);
