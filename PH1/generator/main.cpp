@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 	if(argc == 1) notEnoughArguments();
 
 	CoordinateFrame reference = mkCoordinateFrame();
-	const char * filename = "filename.xml";
+	char * filename = "filename.xml";
 
 	if(strcmp(argv[1], "plane") == 0) {
 	    frameHyperplane(reference,1);

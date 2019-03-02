@@ -290,7 +290,7 @@ void frameStacker(CoordinateFrame reference,int points, int stacks, double (*f)(
 	double f1;
 	CoordinateFrame nw = mkCoordinateFrame(reference);
 	frameScale(nw,1.0f,dh,1.0f);
-	
+
 	for(int i = 0; i < stacks; i++){
 		f1 = f(currenth);
 		plataform(nw, points, f0, f1 ,(i==0),(i == stacks-1));
