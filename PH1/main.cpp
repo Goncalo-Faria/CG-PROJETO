@@ -1,126 +1,55 @@
 #include <math.h>
 #include <cstdio>
 #include <cstdlib>
-#include "monadWindow.h"
+#include "coordinateFrame.h"
 
-#define back(X,Y) unmkMonadWindow(X);X = mkMonadWindow(Y)
-
-void circle(MonadWindow reference,int points){
-	float tangle = (float)((points - 2) * 180);
-	float angle = tangle/points;
-	MonadWindow mon = mkMonadWindow(reference);
-
-	for(int i = 0; i< points;i++)
-		monadTriangle(mon,angle);
-
-	unmkMonadWindow(mon);
+double lin(double dh){
+	return (1 - dh);
 }
 
-float lin(float dh, float h){
-	return (h - dh)/h;
+double cuple(double dh){
+	return sqrt( (1  - dh*dh) + 1e-15);
 }
 
-float cuple(float dh, float h){
-	return sqrt( (h*h  - dh*dh) )/h;
+double cil(double dh){
+	return 1;
 }
 
-void sphere(MonadWindow reference, float radius, int slices, int stacks) {
-	MonadWindow nw = mkMonadWindow(reference);
-    monadScale(nw, radius, radius, radius);
-	stacker(nw,slices,stacks,1, cuple);
-	monadRotate(nw,180,1.0,0.0,0.0);
-	stacker(nw, slices,stacks,1, cuple);
-	unmkMonadWindow(nw);
+void sphere(CoordinateFrame reference, double radius, int slices, int stacks) {
+	CoordinateFrame nw = mkCoordinateFrame(reference);
+    frameScale(nw, radius, radius, radius);
+	frameStacker(nw,slices,stacks, cuple);
+	frameRotate(nw,180,1.0,0.0,0.0);
+	frameStacker(nw, slices,stacks, cuple);
+	unmkCoordinateFrame(nw);
+}
+void cone(CoordinateFrame reference, double radius, double height, int slices, int stacks) {
+    CoordinateFrame nw = mkCoordinateFrame(reference);
+    frameScale(nw, radius, height, radius);
+    frameStacker(nw, slices, stacks, lin);
+    unmkCoordinateFrame(nw);
 }
 
-void cone(MonadWindow reference, float radius, float height, int slices, int stacks) {
-    float normalizeHeight = height/radius;
-    MonadWindow nw = mkMonadWindow(reference);
-    monadScale(nw, radius, radius, radius);
-    stacker(nw, slices, stacks, normalizeHeight, lin);
-    unmkMonadWindow(nw);
-}
+void box(CoordinateFrame reference, int dx, int dy, int dz, int divisions) {
+    CoordinateFrame nw = mkCoordinateFrame(reference);
 
-void plane(MonadWindow reference) {
-    MonadWindow nw = mkMonadWindow(reference);
+    frameScale(reference,dx,dy,dz);
+    frameCube(reference,divisions);
 
-    monadPoint(nw,-0.5,0,-0.5);
-    monadPoint(nw,-0.5,0,0.5);
-    monadPoint(nw,0.5,0,-0.5);
-
-    monadPoint(nw,-0.5,0,0.5);
-    monadPoint(nw,0.5,0,0.5);
-    monadPoint(nw,0.5,0,-0.5);
-
-    unmkMonadWindow(nw);
-}
-
-void hyperplane(MonadWindow reference, int divisions){
-    MonadWindow nw = mkMonadWindow(reference);
-
-    monadScale(nw, 1.0/(float)divisions, 1.0/(float)divisions, 1.0/(float)divisions);
-    monadTranslate(nw, -0.5*(divisions-1), 0.0, -0.5*(divisions-1));
-
-    for(int i = 0; i < divisions; i++){
-        plane(nw);
-        for(int j = 0; j < (divisions - 1); j++){
-            monadTranslate(nw,1,0.0,0.0);
-            plane(nw);
-        }
-        monadTranslate(nw,-divisions+1,0.0,1.0);
-    }
-
-    unmkMonadWindow(nw);
-}
-
-void cubeCube(MonadWindow reference, int divisions) {
-    MonadWindow nw = mkMonadWindow(reference);
-
-    monadTranslate(nw, 0.0, -0.5, 0.0);
-    monadRotate(nw, 180, 1.0, 0.0, 0.0);
-    hyperplane(nw, divisions);
-    
-    back(nw,reference);
-    monadTranslate(nw, 0.0, 0.5, 0.0);
-    hyperplane(nw, divisions);
-    
-    back(nw,reference);
-    monadRotate(nw,90,1,0,0);
-    monadTranslate(nw, 0.0, 0.5, 0.0);
-    hyperplane(nw, divisions);
-
-    monadTranslate(nw, 0.0, -1.0, 0.0);
-    monadRotate(nw,180,1.0,0.0,0.0);
-    hyperplane(nw, divisions);
-
-    back(nw,reference);
-    monadRotate(nw,90,0.0,0.0,-1.0);
-    monadTranslate(nw, 0.0, 0.5, 0.0);
-    hyperplane(nw, divisions);
-
-    monadTranslate(nw, 0.0, -1.0, 0.0);
-    monadRotate(nw,180,0,0,-1);
-    hyperplane(nw, divisions);
-
-    unmkMonadWindow(nw);
-}
-
-void box(MonadWindow reference, int dx, int dy, int dz, int divisions) {
-    MonadWindow nw = mkMonadWindow(reference);
-
-    monadScale(reference,dx,dy,dz);
-    cubeCube(reference,divisions);
-
-    unmkMonadWindow(nw);
+    unmkCoordinateFrame(nw);
 }
 
 int main(int argc, char **argv) {
-	MonadWindow reference = mkMonadWindow();
+	CoordinateFrame reference = mkCoordinateFrame();
 
-    box(reference, 2.0,2.0,2.0,2);
+    //box(reference, 2.0,2.0,2.0,2);
 
-    print_trace(reference,"figure.xml","figure");
+    //frameStacker(reference,3, 3, cuple);
+    sphere(reference,1.0,10,10);
+    //frameCircle(reference,6);
 
-	unmkMonadWindow(reference);
+    frameTrace(reference,"figure.xml","figure");
+
+	unmkCoordinateFrame(reference);
 	return 1;
 }
