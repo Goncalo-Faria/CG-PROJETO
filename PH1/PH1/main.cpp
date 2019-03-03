@@ -64,24 +64,26 @@ void renderScene() {
 
 void keyboardCallback(unsigned char key_code, int xaaa, int yaaa) {
 	switch (key_code) {
-	case 'w':
-		x += 2.0f;
-		break;
-	case 's':
-		x -= 2.0f;
-		break;
-	case 'a':
-		y -= 2.0f;
-		break;
-	case 'd':
-		y += 2.0f;
-		break;
-	case 'e':
-		z += 2.0f;
-		break;
-	case 'r':
-		z -= 2.0f;
-		break;
+        case 'w':
+            x += 2.0f;
+            break;
+        case 's':
+            x -= 2.0f;
+            break;
+        case 'a':
+            y -= 2.0f;
+            break;
+        case 'd':
+            y += 2.0f;
+            break;
+        case 'e':
+            z += 2.0f;
+            break;
+        case 'r':
+            z -= 2.0f;
+            break;
+        default:
+            break;
 	}
 
 	glutPostRedisplay();
@@ -124,7 +126,7 @@ void parseModel(const char * filename) {
 		while (getline(file, line)) {
 			if (line.find("point") != string::npos) {
 				vector<string> s = split(line, '"');
-				points.push_back(make_tuple(stod(s.at(1)), stod(s.at(3)), stod(s.at(5))));
+				points.emplace_back(make_tuple(stod(s.at(1)), stod(s.at(3)), stod(s.at(5))));
 			}
 		}
 		file.close();
@@ -146,7 +148,7 @@ bool parseModels(const char * filename) {
 		return false;
 
 	XMLElement * e = root->FirstChildElement("model");
-	while( e != NULL) {
+	while( e != nullptr) {
 		parseModel(e->Attribute("file"));
 		e = e->NextSiblingElement("model");
 	}

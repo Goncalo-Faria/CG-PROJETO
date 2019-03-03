@@ -1,3 +1,5 @@
+#define _USE_MATH_DEFINES
+
 #include <math.h>
 #include <cstdio>
 #include <cstdlib>
@@ -26,7 +28,7 @@ typedef struct frame {
 
 
 Point mkPoint(double x, double y, double z){
-	Point m = (Point) malloc( sizeof(struct point) );
+	auto m = (Point) malloc( sizeof(struct point) );
 	m->p[0] = x;
 	m->p[1] = y;
 	m->p[2] = z;
@@ -40,21 +42,20 @@ void unmkPoint(Point p){
 void frameTrace(CoordinateFrame m, char* filename, char* figure){
 	int count=0;
 
-	XMLDocument* doc = new XMLDocument();
+	auto * doc = new XMLDocument();
 	XMLNode* major = doc->InsertEndChild( doc->NewElement(figure) );
 	XMLElement* triangle;
 	XMLElement *point;
-	XMLNode* ntraingle, *npoint;
-	XMLText* text;
+	XMLNode* nTriangle = nullptr;
 	for(L cur = m->front; cur ; cur = cur->px){
 
 		if(!(count%3) ){
 			triangle = doc->NewElement( "triangle" );
-			ntraingle = major->InsertEndChild( triangle );
+            nTriangle = major->InsertEndChild( triangle );
 		}
 				
 		point = doc->NewElement( "point" );
-		npoint = ntraingle->InsertEndChild( point );
+        nTriangle->InsertEndChild( point );
 
 		point->SetAttribute("x",cur->value->p[0]);
 		point->SetAttribute("y",cur->value->p[1]);
@@ -71,14 +72,13 @@ void frameTrace(CoordinateFrame m, char* filename, char* figure){
 
 
 CoordinateFrame mkCoordinateFrame(){
-	CoordinateFrame m = (CoordinateFrame) malloc( sizeof(struct frame) );
+	auto m = (CoordinateFrame) malloc( sizeof(struct frame) );
 	for(int i = 0; i< 4; i++)
 		for( int j=0; j<4; j++)
 			m->t[i][j] = (i==j);
 	
-	m->ref = NULL;
-	m->back = NULL;
-	m->front = NULL;
+	m->ref = nullptr;
+	m->back = m->front = nullptr;
 
 	return m;
 }
@@ -94,13 +94,13 @@ void unmkCoordinateFrame(CoordinateFrame m){
 }
 
 CoordinateFrame mkCoordinateFrame(CoordinateFrame mold){
-	CoordinateFrame m = (CoordinateFrame) malloc( sizeof(struct frame) );
+	auto m = (CoordinateFrame) malloc( sizeof(struct frame) );
 	for(int i = 0; i< 4; i++)
 		for( int j=0; j<4; j++)
 			m->t[i][j] = mold->t[i][j];
 	
 	m->ref = mold;
-	m->back = m->front = NULL;
+	m->back = m->front = nullptr;
 
 	return m;
 }
@@ -109,7 +109,7 @@ void frameReference(CoordinateFrame  m, Point p){
 	if( !m->ref ){
 		L n =  (L) malloc( sizeof(struct l) );
 		n->value = p;
-		n->px = NULL;
+		n->px = nullptr;
 
 		if( !m->back ){
 			m->back = m->front = n;
@@ -247,7 +247,6 @@ void frameTriangle(CoordinateFrame m, double angle, double difs){
 }
 
 void plataform(CoordinateFrame reference, int points, double bottomradius, double topradius, int upface, int downface){
-	double ginner = 180 * 2 /((double)points);
 	double rinner = 2 * M_PI /((double)points);
 
 	CoordinateFrame db = mkCoordinateFrame(reference);
@@ -340,6 +339,7 @@ void frameCube(CoordinateFrame reference, int divisions) {
 		switch(i){
 			case 1: frameRotate(nw,90,1,0,0);break;
 			case 2: frameRotate(nw,90,0.0,0.0,-1.0);break;
+            default:break;
 		}
 
     	frameTranslate(nw, 0.0, 0.5, 0.0);
