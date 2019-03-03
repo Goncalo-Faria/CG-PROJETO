@@ -19,10 +19,7 @@ double cil(double dh){
 }
 
 double smartshephere(double dh){
-	if( dh <= 0.5)
-		return sqrt( 1 - pow(1- 2*dh,2));
-	else
-		return sqrt( 1 - pow(2*dh - 1,2));
+	return 2*sqrt( 1 - pow(1- 2*dh,2));
 }
 
 /* legacy
@@ -38,7 +35,7 @@ void sphere(CoordinateFrame reference, double radius, int slices, int stacks) {
 
 void sphere(CoordinateFrame reference, double radius, int slices, int stacks) {
 	CoordinateFrame nw = mkCoordinateFrame(reference);
-    frameScale(nw, radius, 2*radius, radius);
+    frameScale(nw, radius, radius, radius);
 	frameStacker(nw,slices,stacks, smartshephere);
 	unmkCoordinateFrame(nw);
 }
