@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
-project(untitled)
+project(generator)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(untitled main.cpp monadWindow.cpp tinyxml2.cpp)
+add_executable(generator main.cpp coordinateFrame.cpp tinyxml2.cpp)
