@@ -49,8 +49,8 @@ void notEnoughArguments() {
 
 char * createBox(int argc, char **argv, CoordinateFrame reference) {
     // x , y , z , divisions(optional)
-    if(argc < 5) notEnoughArguments();
-    if(argc == 5) {
+    if(argc < 6) notEnoughArguments();
+    if(argc == 6) {
         box(reference, atof(argv[2]),atof(argv[3]),atof(argv[4]),1);
         return argv[5];
     } else {
