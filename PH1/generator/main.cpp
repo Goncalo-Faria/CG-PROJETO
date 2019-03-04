@@ -18,7 +18,7 @@ double smartSphere(double dh){
 }
 
 double smartshephere(double dh){
-	return sqrt( 1 - pow(1 - 2*dh,2) + 1e-5);
+	return sqrt( 1 - pow(1 - 2*dh,2) + 1e-7);
 }
 
 /* legacy
