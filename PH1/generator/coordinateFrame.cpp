@@ -163,7 +163,7 @@ CoordinateFrame mkCoordinateFrameRz(double angle){
 	return m;
 }
 
-void frameAgregate(CoordinateFrame a, CoordinateFrame b){
+void frameAggregate(CoordinateFrame a, CoordinateFrame b){
 	double result[4][4];
 
 	for( int i = 0; i<4; i++ )
@@ -187,15 +187,15 @@ void frameRotate(CoordinateFrame m, double angle, double vx, double vy, double v
 	double rz = vz*angle;
 
 	CoordinateFrame tmp = mkCoordinateFrameRx(rx);
-	frameAgregate(m,tmp);
+	frameAggregate(m,tmp);
 	unmkCoordinateFrame(tmp);
 
 	tmp = mkCoordinateFrameRy(ry);
-	frameAgregate(m,tmp);
+	frameAggregate(m,tmp);
 	unmkCoordinateFrame(tmp);
 
 	tmp = mkCoordinateFrameRz(rz);
-	frameAgregate(m,tmp);
+	frameAggregate(m,tmp);
 	unmkCoordinateFrame(tmp);
 }
 
@@ -206,7 +206,7 @@ void frameTranslate(CoordinateFrame m, double x, double y, double z){
 	mt->t[1][3] = y;
 	mt->t[2][3] = z;
 
-	frameAgregate(m, mt);
+	frameAggregate(m, mt);
 
 	unmkCoordinateFrame(mt);
 }
@@ -218,7 +218,7 @@ void frameScale(CoordinateFrame m, double vx, double vy, double vz ){
 	mt->t[1][1] = vy;
 	mt->t[2][2] = vz;
 
-	frameAgregate(m, mt);
+	frameAggregate(m, mt);
 
 	unmkCoordinateFrame(mt);
 }
