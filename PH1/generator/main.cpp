@@ -10,13 +10,6 @@ double lin(double dh){
     return (1 - dh);
 }
 
-double smartSphere(double dh){
-    if( dh <= 0.5)
-        return sqrt( 1 - pow(1- 2*dh,2));
-    else
-        return sqrt( 1 - pow(2*dh - 1,2));
-}
-
 double smartshephere(double dh){
 	return sqrt( 1 - pow(1 - 2*dh,2) + 1e-7);
 }
