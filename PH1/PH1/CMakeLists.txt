@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.5)
+set (CMAKE_CXX_STANDARD 11)
 
 # Project Name
 PROJECT(PH1)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} main.cpp tinyxml2.cpp)
 
 find_package(OpenGL REQUIRED)
 include_directories(${OpenGL_INCLUDE_DIRS})

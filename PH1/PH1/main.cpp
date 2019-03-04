@@ -14,7 +14,10 @@
 #include <fstream>
 #include <sstream>
 
+#include "tinyxml2.h"
+
 using namespace std;
+using namespace tinyxml2;
 
 vector<tuple<double, double, double>> points;
 
@@ -61,24 +64,26 @@ void renderScene() {
 
 void keyboardCallback(unsigned char key_code, int xaaa, int yaaa) {
 	switch (key_code) {
-	case 'w':
-		x += 2.0f;
-		break;
-	case 's':
-		x -= 2.0f;
-		break;
-	case 'a':
-		y -= 2.0f;
-		break;
-	case 'd':
-		y += 2.0f;
-		break;
-	case 'e':
-		z += 2.0f;
-		break;
-	case 'r':
-		z -= 2.0f;
-		break;
+        case 'w':
+            x += 2.0f;
+            break;
+        case 's':
+            x -= 2.0f;
+            break;
+        case 'a':
+            y -= 2.0f;
+            break;
+        case 'd':
+            y += 2.0f;
+            break;
+        case 'e':
+            z += 2.0f;
+            break;
+        case 'r':
+            z -= 2.0f;
+            break;
+        default:
+            break;
 	}
 
 	glutPostRedisplay();
@@ -114,29 +119,53 @@ vector<string> split(string strToSplit, char delimeter)
 	return splittedStrings;
 }
 
-void parseFromStdin(int argc, char ** argv) {
-	for (int i = 0; i < argc; i++) {
-		std::ifstream file(argv[i]);
-		if (file.is_open()) {
-			std::string line;
-			while (getline(file, line)) {
-				if (line.find("point") != string::npos) {
-					vector<string> s = split(line, '"');
-					points.push_back(make_tuple(stod(s.at(1)), stod(s.at(3)), stod(s.at(5))));
-				}
+void parseModel(const char * filename) {
+	ifstream file(filename);
+	if (file.is_open()) {
+		string line;
+		while (getline(file, line)) {
+			if (line.find("point") != string::npos) {
+				vector<string> s = split(line, '"');
+				points.emplace_back(make_tuple(stod(s.at(1)), stod(s.at(3)), stod(s.at(5))));
 			}
-			file.close();
 		}
+		file.close();
 	}
+}
+
+bool parseModels(const char * filename) {
+	XMLDocument xml_doc;
+
+	XMLError eResult = 
+		xml_doc.LoadFile(filename);
+
+	if (eResult != XML_SUCCESS)
+		return false;
+
+	XMLNode* root = xml_doc.FirstChildElement("scene");
+
+	if (root == nullptr)
+		return false;
+
+	XMLElement * e = root->FirstChildElement("model");
+	while( e != nullptr) {
+		parseModel(e->Attribute("file"));
+		e = e->NextSiblingElement("model");
+	}
+
+	return true;
 }
 
 int main(int argc, char ** argv) {
 	if (argc < 2) {
-		std::cout << "At least one file with models is needed." << endl;
+		cout << "No model file provided." << endl;
 		return 2;
 	}
 
-	parseFromStdin(argc, argv);
+	if (!parseModels(argv[1])) {
+		return 3;
+	}
+
 	glut(argc, argv);
 
 	return 1;

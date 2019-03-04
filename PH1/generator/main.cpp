@@ -7,19 +7,18 @@
 #include "coordinateFrame.h"
 
 double lin(double dh){
-	return (1 - dh);
+    return (1 - dh);
 }
 
-double cuple(double dh){
-	return sqrt( (1  - dh*dh) + 1e-15);
-}
-
-double cil(double dh){
-	return 1;
+double smartSphere(double dh){
+    if( dh <= 0.5)
+        return sqrt( 1 - pow(1- 2*dh,2));
+    else
+        return sqrt( 1 - pow(2*dh - 1,2));
 }
 
 double smartshephere(double dh){
-	return 2*sqrt( 1 - pow(1- 2*dh,2));
+	return sqrt( 1 - pow(1 - 2*dh,2) + 1e-5);
 }
 
 /* legacy
@@ -35,8 +34,8 @@ void sphere(CoordinateFrame reference, double radius, int slices, int stacks) {
 
 void sphere(CoordinateFrame reference, double radius, int slices, int stacks) {
 	CoordinateFrame nw = mkCoordinateFrame(reference);
-    frameScale(nw, radius, radius, radius);
-	frameStacker(nw,slices,stacks, smartshephere);
+    frameScale(nw, radius, 2 * radius, radius);
+	frameStacker(nw,slices,stacks,smartshephere);
 	unmkCoordinateFrame(nw);
 }
 
@@ -59,46 +58,60 @@ void box(CoordinateFrame reference, int dx, int dy, int dz, int divisions) {
 
 
 void notEnoughArguments() {
-	std::cout << "Not enough arguments";
-	exit(1);
+    std::cout << "Not enough arguments";
+    exit(1);
+}
+
+char * createBox(int argc, char **argv, CoordinateFrame reference) {
+    // x , y , z , divisions(optional)
+    if(argc < 6) notEnoughArguments();
+    if(argc == 6) {
+        box(reference, atof(argv[2]),atof(argv[3]),atof(argv[4]),1);
+        return argv[5];
+    } else {
+        box(reference, atof(argv[2]),atof(argv[3]),atof(argv[4]),atoi(argv[5]));
+        return argv[6];
+    }
+}
+
+char * createSphere(int argc, char **argv, CoordinateFrame reference) {
+    if(argc < 5) notEnoughArguments();
+    //radius, slices, stacks
+    sphere(reference, atof(argv[2]), atoi(argv[3]), atoi(argv[4]));
+    return argv[5];
+}
+
+char * createCone(int argc, char **argv, CoordinateFrame reference) {
+    if(argc < 6) notEnoughArguments();
+    //bottom radius, height, slices and stacks
+    cone(reference, atof(argv[2]), atof(argv[3]), atoi(argv[4]), atoi(argv[5]));
+    return argv[6];
+}
+
+char * parseInput(int argc, char **argv, CoordinateFrame reference) {
+    if(strcmp(argv[1], "plane") == 0) {
+        frameHyperplane(reference,1);
+        return argv[2];
+    } else if(strcmp(argv[1], "box") == 0) {
+        return createBox(argc, argv, reference);
+    } else if(strcmp(argv[1], "sphere") == 0) {
+        return createSphere(argc, argv, reference);
+    } else if(strcmp(argv[1], "cone") == 0) {
+        return createCone(argc, argv, reference);
+    } else {
+        std::cout << "Unknown model";
+        exit(2);
+    }
 }
 
 int main(int argc, char **argv) {
-	if(argc == 1) notEnoughArguments();
+    if(argc == 1) notEnoughArguments();
 
-	CoordinateFrame reference = mkCoordinateFrame();
-	char * filename = "filename.xml";
+    CoordinateFrame reference = mkCoordinateFrame();
+    char * filename = parseInput(argc, argv, reference);
 
-	if(strcmp(argv[1], "plane") == 0) {
-	    frameHyperplane(reference,1);
-        filename = argv[2];
-	} else if(strcmp(argv[1], "box") == 0) {
-	    // x , y , z , divisions(optional)
-        if(argc < 5) notEnoughArguments();
-        if(argc == 5) {
-            box(reference, atof(argv[2]),atof(argv[3]),atof(argv[4]),1);
-            filename = argv[5];
-        } else {
-            box(reference, atof(argv[2]),atof(argv[3]),atof(argv[4]),atoi(argv[5]));
-            filename = argv[6];
-        }
-    } else if(strcmp(argv[1], "sphere") == 0) {
-		if(argc < 5) notEnoughArguments();
-		//radius, slices, stacks
-		sphere(reference, atof(argv[2]), atoi(argv[3]), atoi(argv[4]));
-		filename = argv[5];
-	} else if(strcmp(argv[1], "cone") == 0) {
-		if(argc < 6) notEnoughArguments();
-		//bottom radius, height, slices and stacks
-		cone(reference, atof(argv[2]), atof(argv[3]), atoi(argv[4]), atoi(argv[5]));
-		filename = argv[6];
-	} else {
-		std::cout << "Unknown model";
-		return 2;
-	}
-
-	frameTrace(reference,filename,"figure");
+    frameTrace(reference, filename, "figure");
     unmkCoordinateFrame(reference);
 
-	return 0;
+    return 0;
 }
