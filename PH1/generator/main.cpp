@@ -14,24 +14,15 @@ double smartshephere(double dh){
 	return sqrt( 1 - pow(1 - 2*dh,2) + 1e-7);
 }
 
-/* legacy
 void sphere(CoordinateFrame reference, double radius, int slices, int stacks) {
 	CoordinateFrame nw = mkCoordinateFrame(reference);
-    frameScale(nw, radius, radius, radius);
-	frameStacker(nw,slices,stacks, cuple);
-	frameRotate(nw,180,1.0,0.0,0.0);
-	frameStacker(nw, slices,stacks, cuple);
-	unmkCoordinateFrame(nw);
-}
-*/
 
-void sphere(CoordinateFrame reference, double radius, int slices, int stacks) {
-	CoordinateFrame nw = mkCoordinateFrame(reference);
-    frameScale(nw, radius, 2 * radius, radius);
+	frameScale(nw, radius, 2 * radius, radius);
+    frameTranslate(nw, 0.0, -0.5, 0.0);
 	frameStacker(nw,slices,stacks,smartshephere);
+
 	unmkCoordinateFrame(nw);
 }
-
 
 void cone(CoordinateFrame reference, double radius, double height, int slices, int stacks) {
     CoordinateFrame nw = mkCoordinateFrame(reference);
