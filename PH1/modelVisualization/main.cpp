@@ -14,6 +14,8 @@
 #include <fstream>
 #include <sstream>
 
+#include "coordinateFrame.h"
+
 #include "tinyxml2.h"
 
 using namespace std;
@@ -25,6 +27,7 @@ GLfloat x = 0.0f;
 GLfloat y = 1.0f;
 GLfloat z = 0.0f;
 
+CoordinateFrame mainframe;
 
 void changeSize(int w, int h) {
 	if(h == 0) h = 1;
@@ -52,10 +55,7 @@ void renderScene() {
 	glRotatef(z, 0.0, 0.0, 1.0);
 
 	glBegin(GL_TRIANGLES);
-        for(auto const& value : points) {
-			glColor3f(rand() / double(RAND_MAX), rand() / double(RAND_MAX), rand() / double(RAND_MAX));
-            glVertex3f(get<0>(value), get<1>(value), get<2>(value));
-        }
+        frameFigure(mainframe);
 	glEnd();
 
 	glutSwapBuffers();
@@ -119,41 +119,84 @@ vector<string> split(string strToSplit, char delimeter)
 	return splittedStrings;
 }
 
-void parseModel(const char * filename) {
+void parseModel(const char * filename, CoordinateFrame state) {
 	ifstream file(filename);
 	if (file.is_open()) {
 		string line;
 		while (getline(file, line)) {
 			if (line.find("point") != string::npos) {
 				vector<string> s = split(line, '"');
-				points.emplace_back(make_tuple(stod(s.at(1)), stod(s.at(3)), stod(s.at(5))));
+				framePoint(state, stod(s.at(1)), stod(s.at(3)), stod(s.at(5)));
 			}
 		}
 		file.close();
 	}
 }
 
-bool parseModels(const char * filename) {
-	XMLDocument xml_doc;
+CoordinateFrame parseGroups(XMLNode * group, CoordinateFrame state){
+	cout << "parseGroups" << endl;
 
+	for(XMLNode * g = group->FirstChild();
+		g != nullptr;
+		g = g->NextSibling()
+		)
+	{
+		const char * name = g->Value();
+		cout << name << endl;
+		if(!strcmp(name,"models")){
+			XMLElement * e = g->FirstChildElement("model");
+	
+			while(e != nullptr) {
+				parseModel(e->Attribute("file"),state);
+				e = e->NextSiblingElement("model");
+				cout << "." << endl;
+			}
+
+		}else if(!strcmp(name,"translate")){
+			//parse, alter state| #< |
+			XMLElement *e = (XMLElement*) g;
+			frameTranslate(	state,
+					 	   	e->DoubleAttribute("X"),
+							e->DoubleAttribute("Y"),
+							e->DoubleAttribute("Z")
+							);
+		}else if(!strcmp(name,"rotate")){
+			//parse, alter state| #< |
+			XMLElement *e = (XMLElement*) g;
+			frameRotate(state,
+						e->DoubleAttribute("angle"),
+						e->DoubleAttribute("axisX"),
+						e->DoubleAttribute("axisY"),
+						e->DoubleAttribute("axisZ")
+						);
+		}else if(!strcmp(name,"group")){
+			state = parseGroups(g, state);
+		}
+	
+	}
+	
+	cout << "parseGroups leave" << endl;
+
+	return state;
+}
+
+CoordinateFrame parse(const char * filename) {
+	XMLDocument xml_doc;
+	cout << "parse" << endl;
 	XMLError eResult = 
 		xml_doc.LoadFile(filename);
 
 	if (eResult != XML_SUCCESS)
-		return false;
+		return NULL;
 
 	XMLNode* root = xml_doc.FirstChildElement("scene");
 
 	if (root == nullptr)
-		return false;
+		return NULL;
+	
+	CoordinateFrame frame = mkCoordinateFrame();
 
-	XMLElement * e = root->FirstChildElement("model");
-	while( e != nullptr) {
-		parseModel(e->Attribute("file"));
-		e = e->NextSiblingElement("model");
-	}
-
-	return true;
+	return parseGroups(root, frame);
 }
 
 int main(int argc, char ** argv) {
@@ -161,12 +204,13 @@ int main(int argc, char ** argv) {
 		cout << "No model file provided." << endl;
 		return 2;
 	}
-
-	if (!parseModels(argv[1])) {
+	mainframe = parse(argv[1]);
+	if (!mainframe) {
 		return 3;
 	}
 
 	glut(argc, argv);
 
+	unmkCoordinateFrame(mainframe);
 	return 1;
 }
