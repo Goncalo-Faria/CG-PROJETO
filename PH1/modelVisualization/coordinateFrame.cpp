@@ -85,28 +85,28 @@ void unmkPoint(Point p){
 }
 
 void frameTrace(CoordinateFrame m, char* filename, char* figure){
-	int count=0;
+    int count=0;
 
-	XMLDocument doc;
-	XMLNode* major = doc.InsertEndChild( doc.NewElement(figure) );
-	XMLElement* triangle,*point;
-	XMLNode* nTriangle;
-	for (Point p : m->points){
-		if(!(count%3) ){
-			triangle = doc.NewElement( "triangle" );
+    XMLDocument doc;
+    XMLNode* major = doc.InsertEndChild( doc.NewElement(figure) );
+    XMLElement* triangle,*point;
+    XMLNode* nTriangle;
+    for (Point p : m->points){
+        if(!(count%3) ){
+            triangle = doc.NewElement( "triangle" );
             nTriangle = major->InsertEndChild( triangle );
-		}
-		point = doc.NewElement( "point" );
+        }
+        point = doc.NewElement( "point" );
         nTriangle->InsertEndChild( point );
 
-		point->SetAttribute("x",p->p[0]);
-		point->SetAttribute("y",p->p[1]);
-		point->SetAttribute("z",p->p[2]);
+        point->SetAttribute("x",p->p[0]);
+        point->SetAttribute("y",p->p[1]);
+        point->SetAttribute("z",p->p[2]);
 
-		count++;
-	}
+        count++;
+    }
 
-	doc.SaveFile(filename);
+    doc.SaveFile(filename);
 }
 
 CoordinateFrame mkCoordinateFrame(){
@@ -122,10 +122,10 @@ CoordinateFrame mkCoordinateFrame(){
 
 void unmkCoordinateFrame(CoordinateFrame m){
 
-	//for (Point attack : m->points) 
-    	//unmkPoint(attack);
+    //for (Point attack : m->points)
+    //unmkPoint(attack);
 
-	free(m);
+    free(m);
 }
 
 CoordinateFrame mkCoordinateFrame(CoordinateFrame mold){
