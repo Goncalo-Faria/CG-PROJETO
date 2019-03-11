@@ -1,6 +1,10 @@
 <scene>
-    <model file='xml/plane.xml'/>
-    <model file='xml/box.xml'/>
-    <model file='xml/sphere.xml'/>
-    <model file='xml/cone.xml'/>
+    <group>
+    <models>
+        <model file='xml/plane.xml'/>
+        <model file='xml/box.xml'/>
+        <model file='xml/sphere.xml'/>
+        <model file='xml/cone.xml'/>
+    </models>
+    </group>
 </scene>

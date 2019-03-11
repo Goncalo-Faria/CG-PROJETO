@@ -56,19 +56,17 @@ void frameTrace(CoordinateFrame m, char* filename, char* figure){
 	XMLElement* triangle;
 	XMLElement *point;
 	XMLNode* nTriangle = nullptr;
-	for(L cur = m->front; cur ; cur = cur->px){
-
+	for (Point p : m->points){
 		if(!(count%3) ){
 			triangle = doc->NewElement( "triangle" );
             nTriangle = major->InsertEndChild( triangle );
 		}
-				
 		point = doc->NewElement( "point" );
         nTriangle->InsertEndChild( point );
 
-		point->SetAttribute("x",cur->value->p[0]);
-		point->SetAttribute("y",cur->value->p[1]);
-		point->SetAttribute("z",cur->value->p[2]);
+		point->SetAttribute("x",p->p[0]);
+		point->SetAttribute("y",p->p[1]);
+		point->SetAttribute("z",p->p[2]);
 
 		count++;
 	}
@@ -78,23 +76,22 @@ void frameTrace(CoordinateFrame m, char* filename, char* figure){
 	delete doc;
 }
 
-
-
 CoordinateFrame mkCoordinateFrame(){
 	auto m = (CoordinateFrame) malloc( sizeof(struct frame) );
 	for(int i = 0; i< 4; i++)
 		for( int j=0; j<4; j++)
 			m->t[i][j] = (i==j);
 	
-	m->ref = nullptr;
+	m->ref = NULL;
 
 	return m;
 }
 
 void unmkCoordinateFrame(CoordinateFrame m){
-	//
-	//delete every point from list.
-	//
+
+	for (Point attack : m->points) 
+    	unmkPoint(attack);
+
 	free(m);
 }
 
@@ -218,7 +215,7 @@ void frameScale(CoordinateFrame m, double vx, double vy, double vz ){
 void framePoint(CoordinateFrame m, double x, double y, double z){
 	double p[4];
 	double a[4];
-	printf("%G - %G - %G \n",x,y,z); 
+	//printf("%G - %G - %G \n",x,y,z); 
 	p[0] = x;
 	p[1] = y;
 	p[2] = z;

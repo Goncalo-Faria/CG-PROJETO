@@ -21,8 +21,6 @@
 using namespace std;
 using namespace tinyxml2;
 
-vector<tuple<double, double, double>> points;
-
 GLfloat x = 0.0f;
 GLfloat y = 1.0f;
 GLfloat z = 0.0f;
@@ -61,26 +59,25 @@ void renderScene() {
 	glutSwapBuffers();
 }
 
-
 void keyboardCallback(unsigned char key_code, int xaaa, int yaaa) {
 	switch (key_code) {
         case 'w':
-            x += 2.0f;
+            x += 10.0f;
             break;
         case 's':
-            x -= 2.0f;
+            x -= 10.0f;
             break;
         case 'a':
-            y -= 2.0f;
+            y -= 10.0f;
             break;
         case 'd':
-            y += 2.0f;
+            y += 10.0f;
             break;
         case 'e':
-            z += 2.0f;
+            z += 10.0f;
             break;
         case 'r':
-            z -= 2.0f;
+            z -= 10.0f;
             break;
         default:
             break;
@@ -196,12 +193,16 @@ CoordinateFrame parse(const char * filename) {
 	
 	CoordinateFrame frame = mkCoordinateFrame();
 
-	return parseGroups(root, frame);
+	frame = parseGroups(root, frame);
+
+	xml_doc.Clear();
+
+	return frame;
 }
 
 int main(int argc, char ** argv) {
 	if (argc < 2) {
-		cout << "No model file provided." << endl;
+		cout << "No scene file provided." << endl;
 		return 2;
 	}
 	mainframe = parse(argv[1]);
@@ -212,5 +213,6 @@ int main(int argc, char ** argv) {
 	glut(argc, argv);
 
 	unmkCoordinateFrame(mainframe);
+
 	return 1;
 }
