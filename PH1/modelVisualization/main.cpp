@@ -166,6 +166,14 @@ CoordinateFrame parseGroups(XMLNode * group, CoordinateFrame state){
 						e->DoubleAttribute("axisY"),
 						e->DoubleAttribute("axisZ")
 						);
+		}else if(!strcmp(name,"scale")){
+			//parse, alter state| #< |
+			XMLElement *e = (XMLElement*) g;
+			frameScale(state,
+							   e->DoubleAttribute("stretchX", 1.0),
+							   e->DoubleAttribute("stretchY", 1.0),
+							   e->DoubleAttribute("stretchZ", 1.0)
+			);
 		}else if(!strcmp(name,"group")){
 			state = parseGroups(g, state);
 		}
