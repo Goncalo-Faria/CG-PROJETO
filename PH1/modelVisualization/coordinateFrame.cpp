@@ -35,9 +35,43 @@ typedef struct frame {
 	struct frame * ref;
 } *CoordinateFrame;
 
+/*API*/
+CoordinateFrame mkCoordinateFrame();
+CoordinateFrame mkCoordinateFrame(CoordinateFrame mold);
+void unmkCoordinateFrame(CoordinateFrame m);
+
+void frameRotate(CoordinateFrame m, double angle, double vx, double vy, double vz);
+void frameTranslate(CoordinateFrame m, double x, double y, double z);
+void frameScale(CoordinateFrame m, double vx, double vy, double vz );
+
+void framePoint(CoordinateFrame m, double x, double y, double z);
+void frameTriangle(CoordinateFrame m, double angle, double difs);
+void frameRegularPolygon(CoordinateFrame reference,int points);
+
+void frameStacker(CoordinateFrame reference, int points, int stacks, double (*f)(double));
+void frameHyperplane(CoordinateFrame reference, int divisions);
+void frameCube(CoordinateFrame reference, int divisions);
+
+void frameTrace(CoordinateFrame m, char* filename, char* figure);
+void frameFigure(CoordinateFrame reference);
+
+/*Internal auxiliary procedures*/
+Point mkPoint(double x, double y, double z);
+void unmkPoint(Point p);
+
+CoordinateFrame mkCoordinateFrameRx(double angle);
+CoordinateFrame mkCoordinateFrameRy(double angle);
+CoordinateFrame mkCoordinateFrameRz(double angle);
+
+void frameAggregate(CoordinateFrame a, CoordinateFrame b);
+
+void plataform(CoordinateFrame reference, int points, double bottomradius, double topradius, int downface, int upface);
+void plane(CoordinateFrame reference);
+
+/* Implementation */
 
 Point mkPoint(double x, double y, double z){
-	auto m = (Point) malloc( sizeof(struct point) );
+	Point m = (Point) malloc( sizeof(struct point) );
 	m->p[0] = x;
 	m->p[1] = y;
 	m->p[2] = z;
@@ -51,17 +85,16 @@ void unmkPoint(Point p){
 void frameTrace(CoordinateFrame m, char* filename, char* figure){
 	int count=0;
 
-	auto * doc = new XMLDocument();
-	XMLNode* major = doc->InsertEndChild( doc->NewElement(figure) );
-	XMLElement* triangle;
-	XMLElement *point;
-	XMLNode* nTriangle = nullptr;
+	XMLDocument doc;
+	XMLNode* major = doc.InsertEndChild( doc.NewElement(figure) );
+	XMLElement* triangle,*point;
+	XMLNode* nTriangle;
 	for (Point p : m->points){
 		if(!(count%3) ){
-			triangle = doc->NewElement( "triangle" );
+			triangle = doc.NewElement( "triangle" );
             nTriangle = major->InsertEndChild( triangle );
 		}
-		point = doc->NewElement( "point" );
+		point = doc.NewElement( "point" );
         nTriangle->InsertEndChild( point );
 
 		point->SetAttribute("x",p->p[0]);
@@ -71,13 +104,11 @@ void frameTrace(CoordinateFrame m, char* filename, char* figure){
 		count++;
 	}
 
-	doc->SaveFile(filename);
-
-	delete doc;
+	doc.SaveFile(filename);
 }
 
 CoordinateFrame mkCoordinateFrame(){
-	auto m = (CoordinateFrame) malloc( sizeof(struct frame) );
+	CoordinateFrame m = (CoordinateFrame) malloc( sizeof(struct frame) );
 	for(int i = 0; i< 4; i++)
 		for( int j=0; j<4; j++)
 			m->t[i][j] = (i==j);
