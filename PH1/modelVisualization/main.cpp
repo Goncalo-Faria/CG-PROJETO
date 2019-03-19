@@ -176,6 +176,8 @@ CoordinateFrame parseGroups(XMLNode * group, CoordinateFrame state){
 			);
 		}else if(!strcmp(name,"group")){
 			state = parseGroups(g, state);
+		}else{
+			cout << "wrong" << endl;
 		}
 	
 	}

@@ -1,12 +1,30 @@
 <scene>
     <group>
-	<translate X='5' Y='0' Z='2' />
-	<rotate angle='45' axisX='0' axisY='1' axisZ='0' />
-	<models>
+	    <models>
             <model file='../xml/plane.xml'/>
             <model file='../xml/box.xml'/>
             <model file='../xml/sphere.xml'/>
-       	    <model file='../xml/cone.xml'/>
+       	    <model file='../xml/cone.xml'/> 
         </models>
+        <group>
+            <translate X='5' Y='0' />
+	        <rotate angle='45' axisX='0' axisY='1' axisZ='0' />
+	        <models>
+                <model file='../xml/plane.xml'/>
+                <model file='../xml/box.xml'/>
+                <model file='../xml/sphere.xml'/>
+       	        <model file='../xml/cone.xml'/> 
+            </models>
+            <group>
+	            <translate X='5' Y='0' />
+    	        <rotate angle='45' axisX='0' axisY='1' axisZ='0' />
+	            <models>
+                    <model file='../xml/plane.xml'/>
+                    <model file='../xml/box.xml'/>
+                    <model file='../xml/sphere.xml'/>
+       	            <model file='../xml/cone.xml'/>
+                </models>
+            </group>
+        </group>
     </group>
 </scene>
