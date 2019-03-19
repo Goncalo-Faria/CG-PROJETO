@@ -175,7 +175,7 @@ CoordinateFrame parseGroups(XMLNode * group, CoordinateFrame state){
 							   e->DoubleAttribute("stretchZ", 1.0)
 			);
 		}else if(!strcmp(name,"group")){
-			state = parseGroups(g, state);
+			unmkCoordinateFrame(parseGroups(g, mkCoordinateFrame(state)));
 		}else{
 			cout << "wrong" << endl;
 		}

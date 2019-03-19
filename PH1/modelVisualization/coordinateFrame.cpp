@@ -122,8 +122,8 @@ CoordinateFrame mkCoordinateFrame(){
 
 void unmkCoordinateFrame(CoordinateFrame m){
 
-	for (Point attack : m->points) 
-    	unmkPoint(attack);
+	//for (Point attack : m->points) 
+    	//unmkPoint(attack);
 
 	free(m);
 }
