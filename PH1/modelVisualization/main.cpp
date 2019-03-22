@@ -43,7 +43,7 @@ void renderScene() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glLoadIdentity();
-	gluLookAt(	10.0,10.0,10.0,
+	gluLookAt(	12.0,12.0,12.0,
 				0.0 ,0.0 ,0.0,
 				0.0 ,1.0 ,0.0
 	);
@@ -89,9 +89,9 @@ void keyboardCallback(unsigned char key_code, int xaaa, int yaaa) {
 void glut(int argc, char **argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DEPTH|GLUT_DOUBLE|GLUT_RGBA);
-    glutInitWindowPosition(100,100);
-    glutInitWindowSize(800,800);
-    glutCreateWindow("PHASE 1");
+    glutInitWindowPosition(0,0);
+    glutInitWindowSize(2000,1000);
+    glutCreateWindow("Solar System");
 
     glutDisplayFunc(renderScene);
     glutReshapeFunc(changeSize);
