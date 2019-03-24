@@ -29,4 +29,8 @@ void frameRegularPolygon(CoordinateFrame reference,int points);
 
 void frameTrace(CoordinateFrame m, char* filename, char* figure);
 
+void frameDraw(CoordinateFrame reference);
+
+void frameBufferData(CoordinateFrame reference);
+
 #endif

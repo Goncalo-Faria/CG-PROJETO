@@ -1,5 +1,3 @@
-
-
 #if defined(_WIN32)
     #include "GL/glut.h"
 #else
@@ -96,8 +94,8 @@ void glut(int argc, char **argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DEPTH|GLUT_DOUBLE|GLUT_RGBA);
     glutInitWindowPosition(0,0);
-    glutInitWindowSize(2000,1000);
-    glutCreateWindow("Solar System");
+	glutInitWindowSize(1450,900);
+    glutCreateWindow(argv[1]);
 
     glutDisplayFunc(renderScene);
     glutReshapeFunc(changeSize);

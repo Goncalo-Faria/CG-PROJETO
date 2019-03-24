@@ -6,91 +6,125 @@
 #include "coordinateFrame.h"
 #include "tinyxml2.h"
 
+#include <vector>
+#include <tuple>
+
+#if defined(_WIN32)
+    #include "GL/glut.h"
+#else
+    #include <GLUT/glut.h>
+#include <iostream>
+
+#endif
+
 #define back(X,Y) unmkCoordinateFrame(X);X = mkCoordinateFrame(Y)
 
 using namespace tinyxml2; 
+using namespace std;
 
 typedef struct point {
 	double p[3];
-} *Point;
+} Point;
 
-typedef struct l {
-	Point value;
-	struct l * px;
-} *L;
 
 typedef struct frame { 
 	double t[4][4];
-	L back;
-	L front;
+	vector<Point> points;
 	struct frame * ref;
+	GLuint buffer;
 } *CoordinateFrame;
 
 
-Point mkPoint(double x, double y, double z){
-	auto m = (Point) malloc( sizeof(struct point) );
+/*API*/
+CoordinateFrame mkCoordinateFrame();
+CoordinateFrame mkCoordinateFrame(CoordinateFrame mold);
+void unmkCoordinateFrame(CoordinateFrame m);
+
+void frameRotate(CoordinateFrame m, double angle, double vx, double vy, double vz);
+void frameTranslate(CoordinateFrame m, double x, double y, double z);
+void frameScale(CoordinateFrame m, double vx, double vy, double vz );
+
+void framePoint(CoordinateFrame m, double x, double y, double z);
+void frameTriangle(CoordinateFrame m, double angle, double difs);
+void frameRegularPolygon(CoordinateFrame reference,int points);
+
+void frameStacker(CoordinateFrame reference, int points, int stacks, double (*f)(double));
+void frameHyperplane(CoordinateFrame reference, int divisions);
+void frameCube(CoordinateFrame reference, int divisions);
+
+void frameTrace(CoordinateFrame m, char* filename, char* figure);
+void frameDraw(CoordinateFrame reference);
+void frameBufferData(CoordinateFrame reference);
+
+/*Internal auxiliary procedures*/
+Point* mkPoint(double x, double y, double z);
+void unmkPoint(Point* p);
+
+CoordinateFrame mkCoordinateFrameRx(double angle);
+CoordinateFrame mkCoordinateFrameRy(double angle);
+CoordinateFrame mkCoordinateFrameRz(double angle);
+
+void frameAggregate(CoordinateFrame a, CoordinateFrame b);
+
+void plataform(CoordinateFrame reference, int points, double bottomradius, double topradius, int downface, int upface);
+void plane(CoordinateFrame reference);
+
+/* Implementation */
+
+Point* mkPoint(double x, double y, double z){
+	Point* m = (Point*) malloc( sizeof(struct point) );
 	m->p[0] = x;
 	m->p[1] = y;
 	m->p[2] = z;
 	return m;
 }
 
-void unmkPoint(Point p){
+void unmkPoint(Point* p){
 	free(p);
 }
 
 void frameTrace(CoordinateFrame m, char* filename, char* figure){
-	int count=0;
+    int count=0;
 
-	auto * doc = new XMLDocument();
-	XMLNode* major = doc->InsertEndChild( doc->NewElement(figure) );
-	XMLElement* triangle;
-	XMLElement *point;
-	XMLNode* nTriangle = nullptr;
-	for(L cur = m->front; cur ; cur = cur->px){
-
-		if(!(count%3) ){
-			triangle = doc->NewElement( "triangle" );
+    XMLDocument doc;
+    XMLNode* major = doc.InsertEndChild( doc.NewElement(figure) );
+    XMLElement* triangle,*point;
+    XMLNode* nTriangle;
+    for (Point p : m->points){
+        if(!(count%3) ){
+            triangle = doc.NewElement( "triangle" );
             nTriangle = major->InsertEndChild( triangle );
-		}
-				
-		point = doc->NewElement( "point" );
+        }
+        point = doc.NewElement( "point" );
         nTriangle->InsertEndChild( point );
 
-		point->SetAttribute("x",cur->value->p[0]);
-		point->SetAttribute("y",cur->value->p[1]);
-		point->SetAttribute("z",cur->value->p[2]);
+        point->SetAttribute("x",p.p[0]);
+        point->SetAttribute("y",p.p[1]);
+        point->SetAttribute("z",p.p[2]);
 
-		count++;
-	}
+        count++;
+    }
 
-	doc->SaveFile(filename);
-
-	delete doc;
+    doc.SaveFile(filename);
 }
 
-
-
 CoordinateFrame mkCoordinateFrame(){
-	auto m = (CoordinateFrame) malloc( sizeof(struct frame) );
+	CoordinateFrame m = (CoordinateFrame) malloc( sizeof(struct frame) );
 	for(int i = 0; i< 4; i++)
 		for( int j=0; j<4; j++)
 			m->t[i][j] = (i==j);
 	
-	m->ref = nullptr;
-	m->back = m->front = nullptr;
+	m->ref = NULL;
+	m->buffer= -1;
+	//printf("mk %d \n",m);
 
 	return m;
 }
 
 void unmkCoordinateFrame(CoordinateFrame m){
-	L aux;
-	for(L cur = m->front; cur ; cur = aux){
-		unmkPoint(cur->value);
-		aux = cur->px;
-		free(cur);
-	}
-	free(m);
+
+	//sprintf("unmk %d \n",m);
+    free(m);
 }
 
 CoordinateFrame mkCoordinateFrame(CoordinateFrame mold){
@@ -100,28 +134,18 @@ CoordinateFrame mkCoordinateFrame(CoordinateFrame mold){
 			m->t[i][j] = mold->t[i][j];
 	
 	m->ref = mold;
-	m->back = m->front = nullptr;
+	m->buffer= -1;
+
+	//printf("mk %d \n",m);
 
 	return m;
 }
 
 void frameReference(CoordinateFrame  m, Point p){
-	if( !m->ref ){
-		L n =  (L) malloc( sizeof(struct l) );
-		n->value = p;
-		n->px = nullptr;
-
-		if( !m->back ){
-			m->back = m->front = n;
-		}else{
-			m->back->px = n;
-			m->back = n;
-		}
-
-	}else{
-
-		frameReference(m->ref,p);
-	}	
+	if( !m->ref )
+		m->points.push_back(p);
+	else
+		frameReference(m->ref,p);	
 }
 
 CoordinateFrame mkCoordinateFrameRx(double angle){
@@ -226,7 +250,7 @@ void frameScale(CoordinateFrame m, double vx, double vy, double vz ){
 void framePoint(CoordinateFrame m, double x, double y, double z){
 	double p[4];
 	double a[4];
-
+	//printf("%G - %G - %G \n",x,y,z); 
 	p[0] = x;
 	p[1] = y;
 	p[2] = z;
@@ -237,7 +261,9 @@ void framePoint(CoordinateFrame m, double x, double y, double z){
 			a[i] += m->t[i][j] * p[j];
 	}
 
-	frameReference(m, mkPoint(a[0], a[1], a[2]));
+	Point * po = mkPoint(a[0], a[1], a[2]);
+	frameReference(m, *po );
+	free(po);
 }
 
 void frameTriangle(CoordinateFrame m, double angle, double difs){
@@ -364,4 +390,28 @@ void frameRegularPolygon(CoordinateFrame reference,int points){
 		frameTriangle(mon,i * inner, inner);
 
 	unmkCoordinateFrame(mon);
+}
+
+void frameDraw(CoordinateFrame reference){
+	//for(Point value : reference->points ) {
+	//glColor3f(rand() / double(RAND_MAX), rand() / double(RAND_MAX), rand() / double(RAND_MAX));
+	//	glVertex3f(value.p[0], value.p[1], value.p[2]);
+	//}
+
+	glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);
+	glVertexPointer(3,GL_DOUBLE,0,0);
+	glDrawArrays(GL_TRIANGLES, 0, reference->points.size());
+
+}
+
+void frameBufferData(CoordinateFrame reference){
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glGenBuffers(1, &(reference->buffer) );
+	glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);
+	glBufferData(
+		GL_ARRAY_BUFFER,
+		reference->points.size() * sizeof(Point),
+		&(reference->points[0]),
+		GL_STATIC_DRAW
+	);
 }
