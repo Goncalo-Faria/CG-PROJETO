@@ -138,7 +138,7 @@ void parseModel(const char * filename, CoordinateFrame state) {
 }
 
 CoordinateFrame parseGroups(XMLNode * group, CoordinateFrame state){
-	printf("<group>\n");
+	//printf("<group>\n");
 
 	for(XMLNode * g = group->FirstChild();
 		g != nullptr;
@@ -147,28 +147,28 @@ CoordinateFrame parseGroups(XMLNode * group, CoordinateFrame state){
 	{
 		const char * name = g->Value();
 		if(!strcmp(name,"models")){
-			printf("<%s>\n",name);
+			//printf("<%s>\n",name);
 			XMLElement * e = g->FirstChildElement("model");
 	
 			while(e != nullptr) {
 				parseModel(e->Attribute("file"),state);
 				e = e->NextSiblingElement("model");
-				cout << "." << endl;
+				//cout << "." << endl;
 			}
-			printf("</%s>\n",name);
+			//printf("</%s>\n",name);
 		}else if(!strcmp(name,"translate")){
 			//parse, alter state| #< |
-			printf("<%s>\n",name);
+			//printf("<%s>\n",name);
 			XMLElement *e = (XMLElement*) g;
 			frameTranslate(	state,
 					 	   	e->DoubleAttribute("X"),
 							e->DoubleAttribute("Y"),
 							e->DoubleAttribute("Z")
 							);
-			printf("</%s>\n",name);
+			//printf("</%s>\n",name);
 		}else if(!strcmp(name,"rotate")){
 			//parse, alter state| #< |
-			printf("<%s>\n",name);
+			//printf("<%s>\n",name);
 			XMLElement *e = (XMLElement*) g;
 			frameRotate(state,
 						e->DoubleAttribute("angle"),
@@ -176,30 +176,30 @@ CoordinateFrame parseGroups(XMLNode * group, CoordinateFrame state){
 						e->DoubleAttribute("axisY"),
 						e->DoubleAttribute("axisZ")
 						);
-			printf("</%s>\n",name);
+			//printf("</%s>\n",name);
 		}else if(!strcmp(name,"scale")){
 			//parse, alter state| #< |
-			printf("<%s>\n",name);
+			//printf("<%s>\n",name);
 			XMLElement *e = (XMLElement*) g;
 			frameScale(state,
 							   e->DoubleAttribute("stretchX", 1.0),
 							   e->DoubleAttribute("stretchY", 1.0),
 							   e->DoubleAttribute("stretchZ", 1.0)
 			);
-			printf("</%s>\n",name);
+			//printf("</%s>\n",name);
 		}else if(!strcmp(name,"group")){
 			unmkCoordinateFrame(parseGroups(g, mkCoordinateFrame(state)));
 		}
 	
 	}
 	
-	printf("</group>\n");
+	//printf("</group>\n");
 	return state;
 }
 
 CoordinateFrame parse(const char * filename) {
 	XMLDocument xml_doc;
-	cout << "parse" << endl;
+	//cout << "parse" << endl;
 	XMLError eResult = 
 		xml_doc.LoadFile(filename);
 

@@ -116,14 +116,14 @@ CoordinateFrame mkCoordinateFrame(){
 	
 	m->ref = NULL;
 	m->buffer= -1;
-	printf("mk %d \n",m);
+	//printf("mk %d \n",m);
 
 	return m;
 }
 
 void unmkCoordinateFrame(CoordinateFrame m){
 
-	printf("unmk %d \n",m);
+	//sprintf("unmk %d \n",m);
     free(m);
 }
 
@@ -136,7 +136,7 @@ CoordinateFrame mkCoordinateFrame(CoordinateFrame mold){
 	m->ref = mold;
 	m->buffer= -1;
 
-	printf("mk %d \n",m);
+	//printf("mk %d \n",m);
 
 	return m;
 }
@@ -398,7 +398,6 @@ void frameDraw(CoordinateFrame reference){
 	//	glVertex3f(value.p[0], value.p[1], value.p[2]);
 	//}
 
-	//draw scene
 	glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);
 	glVertexPointer(3,GL_DOUBLE,0,0);
 	glDrawArrays(GL_TRIANGLES, 0, reference->points.size());
