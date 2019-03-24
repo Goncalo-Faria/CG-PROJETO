@@ -39,6 +39,11 @@ void changeSize(int w, int h) {
 	glMatrixMode(GL_MODELVIEW);
 }
 
+void init() {
+
+	frameBufferData(mainframe);
+}
+
 void renderScene() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -52,9 +57,9 @@ void renderScene() {
 	glRotatef(y, 0.0, 1.0, 0.0);
 	glRotatef(z, 0.0, 0.0, 1.0);
 
-	glBegin(GL_TRIANGLES);
-        frameFigure(mainframe);
-	glEnd();
+	//glBegin(GL_TRIANGLES);
+    frameFigure(mainframe);
+	//glEnd();
 
 	glutSwapBuffers();
 }
@@ -98,7 +103,8 @@ void glut(int argc, char **argv) {
 	glutKeyboardFunc(keyboardCallback);
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
+	init();
 
     glutMainLoop();
 }
@@ -131,7 +137,7 @@ void parseModel(const char * filename, CoordinateFrame state) {
 }
 
 CoordinateFrame parseGroups(XMLNode * group, CoordinateFrame state){
-	cout << "parseGroups" << endl;
+	printf("<group>\n");
 
 	for(XMLNode * g = group->FirstChild();
 		g != nullptr;
@@ -139,8 +145,8 @@ CoordinateFrame parseGroups(XMLNode * group, CoordinateFrame state){
 		)
 	{
 		const char * name = g->Value();
-		cout << name << endl;
 		if(!strcmp(name,"models")){
+			printf("<%s>\n",name);
 			XMLElement * e = g->FirstChildElement("model");
 	
 			while(e != nullptr) {
@@ -148,17 +154,20 @@ CoordinateFrame parseGroups(XMLNode * group, CoordinateFrame state){
 				e = e->NextSiblingElement("model");
 				cout << "." << endl;
 			}
-
+			printf("</%s>\n",name);
 		}else if(!strcmp(name,"translate")){
 			//parse, alter state| #< |
+			printf("<%s>\n",name);
 			XMLElement *e = (XMLElement*) g;
 			frameTranslate(	state,
 					 	   	e->DoubleAttribute("X"),
 							e->DoubleAttribute("Y"),
 							e->DoubleAttribute("Z")
 							);
+			printf("</%s>\n",name);
 		}else if(!strcmp(name,"rotate")){
 			//parse, alter state| #< |
+			printf("<%s>\n",name);
 			XMLElement *e = (XMLElement*) g;
 			frameRotate(state,
 						e->DoubleAttribute("angle"),
@@ -166,24 +175,24 @@ CoordinateFrame parseGroups(XMLNode * group, CoordinateFrame state){
 						e->DoubleAttribute("axisY"),
 						e->DoubleAttribute("axisZ")
 						);
+			printf("</%s>\n",name);
 		}else if(!strcmp(name,"scale")){
 			//parse, alter state| #< |
+			printf("<%s>\n",name);
 			XMLElement *e = (XMLElement*) g;
 			frameScale(state,
 							   e->DoubleAttribute("stretchX", 1.0),
 							   e->DoubleAttribute("stretchY", 1.0),
 							   e->DoubleAttribute("stretchZ", 1.0)
 			);
+			printf("</%s>\n",name);
 		}else if(!strcmp(name,"group")){
 			unmkCoordinateFrame(parseGroups(g, mkCoordinateFrame(state)));
-		}else{
-			cout << "wrong" << endl;
 		}
 	
 	}
 	
-	cout << "parseGroups leave" << endl;
-
+	printf("</group>\n");
 	return state;
 }
 

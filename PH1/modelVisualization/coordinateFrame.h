@@ -31,4 +31,6 @@ void frameTrace(CoordinateFrame m, char* filename, char* figure);
 
 void frameFigure(CoordinateFrame reference);
 
+void frameBufferData(CoordinateFrame reference);
+
 #endif
