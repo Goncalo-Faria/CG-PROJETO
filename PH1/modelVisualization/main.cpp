@@ -1,5 +1,3 @@
-
-
 #if defined(_WIN32)
     #include "GL/glut.h"
 #else
@@ -14,17 +12,18 @@
 #include <fstream>
 #include <sstream>
 
+#include "coordinateFrame.h"
+
 #include "tinyxml2.h"
 
 using namespace std;
 using namespace tinyxml2;
 
-vector<tuple<double, double, double>> points;
-
 GLfloat x = 0.0f;
 GLfloat y = 1.0f;
 GLfloat z = 0.0f;
 
+CoordinateFrame mainframe;
 
 void changeSize(int w, int h) {
 	if(h == 0) h = 1;
@@ -36,6 +35,11 @@ void changeSize(int w, int h) {
     glViewport(0, 0, w, h);
 	gluPerspective(45.0f ,ratio, 1.0f ,1000.0f);
 	glMatrixMode(GL_MODELVIEW);
+}
+
+void init() {
+
+	frameBufferData(mainframe);
 }
 
 void renderScene() {
@@ -51,36 +55,33 @@ void renderScene() {
 	glRotatef(y, 0.0, 1.0, 0.0);
 	glRotatef(z, 0.0, 0.0, 1.0);
 
-	glBegin(GL_TRIANGLES);
-        for(auto const& value : points) {
-			glColor3f(rand() / double(RAND_MAX), rand() / double(RAND_MAX), rand() / double(RAND_MAX));
-            glVertex3f(get<0>(value), get<1>(value), get<2>(value));
-        }
-	glEnd();
+	glColor3f(1.0,1.0,1.0);
+	//glBegin(GL_TRIANGLES);
+    frameDraw(mainframe);
+	//glEnd();
 
 	glutSwapBuffers();
 }
 
-
 void keyboardCallback(unsigned char key_code, int xaaa, int yaaa) {
 	switch (key_code) {
         case 'w':
-            x += 2.0f;
+            x += 10.0f;
             break;
         case 's':
-            x -= 2.0f;
+            x -= 10.0f;
             break;
         case 'a':
-            y -= 2.0f;
+            y -= 10.0f;
             break;
         case 'd':
-            y += 2.0f;
+            y += 10.0f;
             break;
         case 'e':
-            z += 2.0f;
+            z += 10.0f;
             break;
         case 'r':
-            z -= 2.0f;
+            z -= 10.0f;
             break;
         default:
             break;
@@ -94,14 +95,15 @@ void glut(int argc, char **argv) {
     glutInitDisplayMode(GLUT_DEPTH|GLUT_DOUBLE|GLUT_RGBA);
     glutInitWindowPosition(0,0);
 	glutInitWindowSize(1450,900);
-    glutCreateWindow("Solar System");
+    glutCreateWindow(argv[1]);
 
     glutDisplayFunc(renderScene);
     glutReshapeFunc(changeSize);
 	glutKeyboardFunc(keyboardCallback);
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
+	init();
 
     glutMainLoop();
 }
@@ -119,54 +121,116 @@ vector<string> split(string strToSplit, char delimeter)
 	return splittedStrings;
 }
 
-void parseModel(const char * filename) {
+void parseModel(const char * filename, CoordinateFrame state) {
 	ifstream file(filename);
 	if (file.is_open()) {
 		string line;
 		while (getline(file, line)) {
 			if (line.find("point") != string::npos) {
 				vector<string> s = split(line, '"');
-				points.emplace_back(make_tuple(stod(s.at(1)), stod(s.at(3)), stod(s.at(5))));
+				framePoint(state, stod(s.at(1)), stod(s.at(3)), stod(s.at(5)));
 			}
 		}
 		file.close();
 	}
 }
 
-bool parseModels(const char * filename) {
-	XMLDocument xml_doc;
+CoordinateFrame parseGroups(XMLNode * group, CoordinateFrame state){
+	//printf("<group>\n");
 
+	for(XMLNode * g = group->FirstChild();
+		g != nullptr;
+		g = g->NextSibling()
+		)
+	{
+		const char * name = g->Value();
+		if(!strcmp(name,"models")){
+			//printf("<%s>\n",name);
+			XMLElement * e = g->FirstChildElement("model");
+	
+			while(e != nullptr) {
+				parseModel(e->Attribute("file"),state);
+				e = e->NextSiblingElement("model");
+				//cout << "." << endl;
+			}
+			//printf("</%s>\n",name);
+		}else if(!strcmp(name,"translate")){
+			//parse, alter state| #< |
+			//printf("<%s>\n",name);
+			XMLElement *e = (XMLElement*) g;
+			frameTranslate(	state,
+					 	   	e->DoubleAttribute("X"),
+							e->DoubleAttribute("Y"),
+							e->DoubleAttribute("Z")
+							);
+			//printf("</%s>\n",name);
+		}else if(!strcmp(name,"rotate")){
+			//parse, alter state| #< |
+			//printf("<%s>\n",name);
+			XMLElement *e = (XMLElement*) g;
+			frameRotate(state,
+						e->DoubleAttribute("angle"),
+						e->DoubleAttribute("axisX"),
+						e->DoubleAttribute("axisY"),
+						e->DoubleAttribute("axisZ")
+						);
+			//printf("</%s>\n",name);
+		}else if(!strcmp(name,"scale")){
+			//parse, alter state| #< |
+			//printf("<%s>\n",name);
+			XMLElement *e = (XMLElement*) g;
+			frameScale(state,
+							   e->DoubleAttribute("stretchX", 1.0),
+							   e->DoubleAttribute("stretchY", 1.0),
+							   e->DoubleAttribute("stretchZ", 1.0)
+			);
+			//printf("</%s>\n",name);
+		}else if(!strcmp(name,"group")){
+			unmkCoordinateFrame(parseGroups(g, mkCoordinateFrame(state)));
+		}
+	
+	}
+	
+	//printf("</group>\n");
+	return state;
+}
+
+CoordinateFrame parse(const char * filename) {
+	XMLDocument xml_doc;
+	//cout << "parse" << endl;
 	XMLError eResult = 
 		xml_doc.LoadFile(filename);
 
 	if (eResult != XML_SUCCESS)
-		return false;
+		return NULL;
 
 	XMLNode* root = xml_doc.FirstChildElement("scene");
 
 	if (root == nullptr)
-		return false;
+		return NULL;
+	
+	CoordinateFrame frame = mkCoordinateFrame();
 
-	XMLElement * e = root->FirstChildElement("model");
-	while( e != nullptr) {
-		parseModel(e->Attribute("file"));
-		e = e->NextSiblingElement("model");
-	}
+	frame = parseGroups(root, frame);
 
-	return true;
+	xml_doc.Clear();
+
+	return frame;
 }
 
 int main(int argc, char ** argv) {
 	if (argc < 2) {
-		cout << "No model file provided." << endl;
+		cout << "No scene file provided." << endl;
 		return 2;
 	}
-
-	if (!parseModels(argv[1])) {
+	mainframe = parse(argv[1]);
+	if (!mainframe) {
 		return 3;
 	}
 
 	glut(argc, argv);
+
+	unmkCoordinateFrame(mainframe);
 
 	return 1;
 }

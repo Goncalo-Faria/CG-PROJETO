@@ -4,6 +4,14 @@
 #include <cstring>
 #include <iostream>
 
+#if defined(_WIN32)
+    #include "GL/glut.h"
+#else
+    #include <GLUT/glut.h>
+#include <iostream>
+
+#endif
+
 #include "coordinateFrame.h"
 
 double lin(double dh){
