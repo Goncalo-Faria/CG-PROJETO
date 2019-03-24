@@ -57,8 +57,9 @@ void renderScene() {
 	glRotatef(y, 0.0, 1.0, 0.0);
 	glRotatef(z, 0.0, 0.0, 1.0);
 
+	glColor3f(1.0,1.0,1.0);
 	//glBegin(GL_TRIANGLES);
-    frameFigure(mainframe);
+    frameDraw(mainframe);
 	//glEnd();
 
 	glutSwapBuffers();
