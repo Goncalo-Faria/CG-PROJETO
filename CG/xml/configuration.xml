@@ -1,313 +1,313 @@
 <scene>
     <group>
         <models>
-            <model file='../xml/sphere.xml' />
+            <model file='../../xml/sphere.xml' />
         </models>
         <group>
-            <translate X='2' Y='0' Z='0' />
+            <translate X='2' Y='0' Z='2' />
             <scale stretchX='0.22' stretchY='0.22' stretchZ='0.22' />
             <models>
-                <model file='../xml/sphere.xml' />
+                <model file='../../xml/sphere.xml' />
             </models>
         </group>
         <group>
-            <translate X='3.4' Y='0' Z='0' />
+            <translate X='3.4' Y='0.4' Z='0' />
             <scale stretchX='0.3' stretchY='0.3' stretchZ='0.3' />
             <models>
-                <model file='../xml/sphere.xml' />
+                <model file='../../xml/sphere.xml' />
             </models>
         </group>
         <group>
-            <translate X='4.8' Y='0' Z='0' />
+            <translate X='4.8' Y='0.2' Z='-4.8' />
             <scale stretchX='0.35' stretchY='0.35' stretchZ='0.35' />
             <models>
-                <model file='../xml/sphere.xml' />
+                <model file='../../xml/sphere.xml' />
             </models>
             <group>
                 <translate X='1.6' Y='0' Z='0' />
                 <scale stretchX='0.4' stretchY='0.4' stretchZ='0.4' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
         </group>
         <group>
-            <translate X='6.3' Y='0' Z='0' />
+            <translate X='6.3' Y='0' Z='6.3' />
             <scale stretchX='0.27' stretchY='0.27' stretchZ='0.27' />
             <models>
-                <model file='../xml/sphere.xml' />
+                <model file='../../xml/sphere.xml' />
             </models>
             <group>
                 <translate X='1.6' Y='0' Z='0' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='-1.6' Z='1.6' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='-2' Z='3' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
         </group>
         <group>
-            <translate X='7.9' Y='0' Z='0' />
+            <translate X='-7.9' Y='0' Z='0' />
             <scale stretchX='0.43' stretchY='0.43' stretchZ='0.43' />
             <models>
-                <model file='../xml/sphere.xml' />
+                <model file='../../xml/sphere.xml' />
             </models>
             <group>
                 <translate X='1.6' Y='0' Z='0' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='-1.6' Y='0' Z='0' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='-1.6' Z='1.6' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='1.6' Z='1.6' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='1.6' Z='-1.6' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='-1.6' Z='-1.6' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='-3' Z='-3' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='3' Z='3' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='-3' Z='2' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='1' Z='-3' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.3' Y='1.2' Z='-3.9' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='1.1' Y='1.3' Z='2.4' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.3' Y='1' Z='-1.4' />
                 <scale stretchX='0.15' stretchY='0.15' stretchZ='0.15' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
         </group>
         <group>
-            <translate X='9.5' Y='0' Z='0' />
+            <translate X='9.5' Y='-0.3' Z='-9.5' />
             <scale stretchX='0.35' stretchY='0.35' stretchZ='0.35' />
             <models>
-                <model file='../xml/sphere.xml' />
+                <model file='../../xml/sphere.xml' />
             </models>
             <group>
                 <translate X='0.1' Y='-1.6' Z='1.6' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='1.6' Z='1.6' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='1.6' Z='-1.6' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='-2.5' Z='-2.5' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='-2.5' Z='2.5' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='2.5' Z='1.5' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='2.5' Z='-2.5' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='-1' Z='-2.5' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='-0.3' Z='2.3' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='1.0' Y='0.5' Z='-1' />
                 <scale stretchX='0.15' stretchY='0.15' stretchZ='0.15' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
         </group>
         <group>
-            <translate X='11.0' Y='0' Z='0' />
+            <translate X='-11.0' Y='0' Z='-11.0' />
             <scale stretchX='0.32' stretchY='0.32' stretchZ='0.32' />
             <models>
-                <model file='../xml/sphere.xml' />
+                <model file='../../xml/sphere.xml' />
             </models>
             <group>
                 <translate X='0.1' Y='-2.5' Z='2.5' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='2.5' Z='1.5' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='2.5' Z='-2.5' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='-1' Z='-2.5' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='1' Y='-1.3' Z='-2' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
         </group>
         <group>
-            <translate X='12.7' Y='0' Z='0' />
+            <translate X='12.7' Y='0.4' Z='0' />
             <scale stretchX='0.36' stretchY='0.36' stretchZ='0.36' />
             <models>
-                <model file='../xml/sphere.xml' />
+                <model file='../../xml/sphere.xml' />
             </models>
             <group>
                 <translate X='0.1' Y='-2.5' Z='2.5' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='2.5' Z='1.5' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='0.1' Y='2.5' Z='-2.5' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
             <group>
                 <translate X='1' Y='2' Z='3' />
                 <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
                 <models>
-                    <model file='../xml/sphere.xml' />
+                    <model file='../../xml/sphere.xml' />
                 </models>
             </group>
         </group>

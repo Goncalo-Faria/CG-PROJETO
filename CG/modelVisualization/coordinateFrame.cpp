@@ -393,15 +393,9 @@ void frameRegularPolygon(CoordinateFrame reference,int points){
 }
 
 void frameDraw(CoordinateFrame reference){
-	//for(Point value : reference->points ) {
-	//glColor3f(rand() / double(RAND_MAX), rand() / double(RAND_MAX), rand() / double(RAND_MAX));
-	//	glVertex3f(value.p[0], value.p[1], value.p[2]);
-	//}
-
 	glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);
 	glVertexPointer(3,GL_DOUBLE,0,0);
 	glDrawArrays(GL_TRIANGLES, 0, reference->points.size());
-
 }
 
 void frameBufferData(CoordinateFrame reference){
