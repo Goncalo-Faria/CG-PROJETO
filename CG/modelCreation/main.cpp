@@ -12,7 +12,7 @@
 
 #endif
 
-#include "coordinateFrame.h"
+#include "../common/coordinateFrame.h"
 
 double lin(double dh){
     return (1 - dh);

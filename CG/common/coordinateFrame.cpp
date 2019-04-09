@@ -1,31 +1,29 @@
 #define _USE_MATH_DEFINES
 
-#include <math.h>
-#include <cstdio>
-#include <cstdlib>
-#include "coordinateFrame.h"
-#include "tinyxml2.h"
-
-#include <vector>
-#include <tuple>
-
 #if defined(_WIN32)
     #include "GL/glut.h"
 #else
-    #include <GLUT/glut.h>
-#include <iostream>
-
+	#include <GLUT/glut.h>
 #endif
+
+#include "coordinateFrame.h"
+#include "tinyxml2.h"
+#include <math.h>
+#include <cstdio>
+#include <cstdlib>
+#include <vector>
+#include <tuple>
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <tuple>
 
 #define back(X,Y) unmkCoordinateFrame(X);X = mkCoordinateFrame(Y)
 
 using namespace tinyxml2; 
 using namespace std;
-
-typedef struct point {
-	double p[3];
-} Point;
-
 
 typedef struct frame { 
 	double t[4][4];
@@ -56,9 +54,9 @@ void frameTrace(CoordinateFrame m, char* filename, char* figure);
 void frameDraw(CoordinateFrame reference);
 void frameBufferData(CoordinateFrame reference);
 
+CoordinateFrame parse(const char * filename);
+
 /*Internal auxiliary procedures*/
-Point* mkPoint(double x, double y, double z);
-void unmkPoint(Point* p);
 
 CoordinateFrame mkCoordinateFrameRx(double angle);
 CoordinateFrame mkCoordinateFrameRy(double angle);
@@ -69,19 +67,11 @@ void frameAggregate(CoordinateFrame a, CoordinateFrame b);
 void plataform(CoordinateFrame reference, int points, double bottomradius, double topradius, int downface, int upface);
 void plane(CoordinateFrame reference);
 
+CoordinateFrame parseGroups(XMLNode * group, CoordinateFrame state);
+void parseModel(const char * filename, CoordinateFrame state);
+vector<string> split(string strToSplit, char delimeter);
+
 /* Implementation */
-
-Point* mkPoint(double x, double y, double z){
-	Point* m = (Point*) malloc( sizeof(struct point) );
-	m->p[0] = x;
-	m->p[1] = y;
-	m->p[2] = z;
-	return m;
-}
-
-void unmkPoint(Point* p){
-	free(p);
-}
 
 void frameTrace(CoordinateFrame m, char* filename, char* figure){
     int count=0;
@@ -393,15 +383,9 @@ void frameRegularPolygon(CoordinateFrame reference,int points){
 }
 
 void frameDraw(CoordinateFrame reference){
-	//for(Point value : reference->points ) {
-	//glColor3f(rand() / double(RAND_MAX), rand() / double(RAND_MAX), rand() / double(RAND_MAX));
-	//	glVertex3f(value.p[0], value.p[1], value.p[2]);
-	//}
-
 	glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);
 	glVertexPointer(3,GL_DOUBLE,0,0);
 	glDrawArrays(GL_TRIANGLES, 0, reference->points.size());
-
 }
 
 void frameBufferData(CoordinateFrame reference){
@@ -414,4 +398,104 @@ void frameBufferData(CoordinateFrame reference){
 		&(reference->points[0]),
 		GL_STATIC_DRAW
 	);
+}
+
+CoordinateFrame parseGroups(XMLNode * group, CoordinateFrame state){
+
+	for(XMLNode * g = group->FirstChild();
+		g != nullptr;
+		g = g->NextSibling()
+		)
+	{
+		const char * name = g->Value();
+		if(!strcmp(name,"models")){
+			XMLElement * e = g->FirstChildElement("model");
+	
+			while(e != nullptr) {
+				parseModel(e->Attribute("file"),state);
+				e = e->NextSiblingElement("model");
+			}
+		}else if(!strcmp(name,"translate")){
+
+			XMLElement *e = (XMLElement*) g;
+			frameTranslate(	state,
+					 	   	e->DoubleAttribute("X"),
+							e->DoubleAttribute("Y"),
+							e->DoubleAttribute("Z")
+							);
+		}else if(!strcmp(name,"rotate")){
+			
+			XMLElement *e = (XMLElement*) g;
+			frameRotate(state,
+						e->DoubleAttribute("angle"),
+						e->DoubleAttribute("axisX"),
+						e->DoubleAttribute("axisY"),
+						e->DoubleAttribute("axisZ")
+						);
+		}else if(!strcmp(name,"scale")){
+		
+			XMLElement *e = (XMLElement*) g;
+			frameScale(state,
+							   e->DoubleAttribute("stretchX", 1.0),
+							   e->DoubleAttribute("stretchY", 1.0),
+							   e->DoubleAttribute("stretchZ", 1.0)
+			);
+		
+		}else if(!strcmp(name,"group")){
+			unmkCoordinateFrame(parseGroups(g, mkCoordinateFrame(state)));
+		}
+	
+	}
+
+	return state;
+}
+
+CoordinateFrame parse(const char * filename) {
+	XMLDocument xml_doc;
+	//cout << "parse" << endl;
+	XMLError eResult = 
+		xml_doc.LoadFile(filename);
+
+	if (eResult != XML_SUCCESS)
+		return NULL;
+
+	XMLNode* root = xml_doc.FirstChildElement("scene");
+
+	if (root == nullptr)
+		return NULL;
+	
+	CoordinateFrame frame = mkCoordinateFrame();
+
+	frame = parseGroups(root, frame);
+
+	xml_doc.Clear();
+
+	return frame;
+}
+
+vector<string> split(string strToSplit, char delimeter)
+{
+	stringstream ss(strToSplit);
+	string item;
+	vector<string> splittedStrings;
+
+	while (getline(ss, item, delimeter)){
+		splittedStrings.push_back(item);
+	}
+
+	return splittedStrings;
+}
+
+void parseModel(const char * filename, CoordinateFrame state) {
+	ifstream file(filename);
+	if (file.is_open()) {
+		string line;
+		while (getline(file, line)) {
+			if (line.find("point") != string::npos) {
+				vector<string> s = split(line, '"');
+				framePoint(state, stod(s.at(1)), stod(s.at(3)), stod(s.at(5)));
+			}
+		}
+		file.close();
+	}
 }

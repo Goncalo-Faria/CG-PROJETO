@@ -4,20 +4,11 @@
     #include <GLUT/glut.h>
 #endif
 
-#include <math.h>
-#include <vector>
-#include <tuple>
+#include "../common/coordinateFrame.h"
+
 #include <iostream>
-#include <string>
-#include <fstream>
-#include <sstream>
-
-#include "coordinateFrame.h"
-
-#include "tinyxml2.h"
 
 using namespace std;
-using namespace tinyxml2;
 
 GLfloat x = 0.0f;
 GLfloat y = 1.0f;
@@ -40,6 +31,7 @@ void changeSize(int w, int h) {
 void init() {
 
 	frameBufferData(mainframe);
+
 }
 
 void renderScene() {
@@ -56,9 +48,8 @@ void renderScene() {
 	glRotatef(z, 0.0, 0.0, 1.0);
 
 	glColor3f(1.0,1.0,1.0);
-	//glBegin(GL_TRIANGLES);
+
     frameDraw(mainframe);
-	//glEnd();
 
 	glutSwapBuffers();
 }
@@ -103,119 +94,10 @@ void glut(int argc, char **argv) {
 
     glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+
 	init();
 
     glutMainLoop();
-}
-
-vector<string> split(string strToSplit, char delimeter)
-{
-	stringstream ss(strToSplit);
-	string item;
-	vector<string> splittedStrings;
-
-	while (getline(ss, item, delimeter)){
-		splittedStrings.push_back(item);
-	}
-
-	return splittedStrings;
-}
-
-void parseModel(const char * filename, CoordinateFrame state) {
-	ifstream file(filename);
-	if (file.is_open()) {
-		string line;
-		while (getline(file, line)) {
-			if (line.find("point") != string::npos) {
-				vector<string> s = split(line, '"');
-				framePoint(state, stod(s.at(1)), stod(s.at(3)), stod(s.at(5)));
-			}
-		}
-		file.close();
-	}
-}
-
-CoordinateFrame parseGroups(XMLNode * group, CoordinateFrame state){
-	//printf("<group>\n");
-
-	for(XMLNode * g = group->FirstChild();
-		g != nullptr;
-		g = g->NextSibling()
-		)
-	{
-		const char * name = g->Value();
-		if(!strcmp(name,"models")){
-			//printf("<%s>\n",name);
-			XMLElement * e = g->FirstChildElement("model");
-	
-			while(e != nullptr) {
-				parseModel(e->Attribute("file"),state);
-				e = e->NextSiblingElement("model");
-				//cout << "." << endl;
-			}
-			//printf("</%s>\n",name);
-		}else if(!strcmp(name,"translate")){
-			//parse, alter state| #< |
-			//printf("<%s>\n",name);
-			XMLElement *e = (XMLElement*) g;
-			frameTranslate(	state,
-					 	   	e->DoubleAttribute("X"),
-							e->DoubleAttribute("Y"),
-							e->DoubleAttribute("Z")
-							);
-			//printf("</%s>\n",name);
-		}else if(!strcmp(name,"rotate")){
-			//parse, alter state| #< |
-			//printf("<%s>\n",name);
-			XMLElement *e = (XMLElement*) g;
-			frameRotate(state,
-						e->DoubleAttribute("angle"),
-						e->DoubleAttribute("axisX"),
-						e->DoubleAttribute("axisY"),
-						e->DoubleAttribute("axisZ")
-						);
-			//printf("</%s>\n",name);
-		}else if(!strcmp(name,"scale")){
-			//parse, alter state| #< |
-			//printf("<%s>\n",name);
-			XMLElement *e = (XMLElement*) g;
-			frameScale(state,
-							   e->DoubleAttribute("stretchX", 1.0),
-							   e->DoubleAttribute("stretchY", 1.0),
-							   e->DoubleAttribute("stretchZ", 1.0)
-			);
-			//printf("</%s>\n",name);
-		}else if(!strcmp(name,"group")){
-			unmkCoordinateFrame(parseGroups(g, mkCoordinateFrame(state)));
-		}
-	
-	}
-	
-	//printf("</group>\n");
-	return state;
-}
-
-CoordinateFrame parse(const char * filename) {
-	XMLDocument xml_doc;
-	//cout << "parse" << endl;
-	XMLError eResult = 
-		xml_doc.LoadFile(filename);
-
-	if (eResult != XML_SUCCESS)
-		return NULL;
-
-	XMLNode* root = xml_doc.FirstChildElement("scene");
-
-	if (root == nullptr)
-		return NULL;
-	
-	CoordinateFrame frame = mkCoordinateFrame();
-
-	frame = parseGroups(root, frame);
-
-	xml_doc.Clear();
-
-	return frame;
 }
 
 int main(int argc, char ** argv) {
@@ -234,3 +116,7 @@ int main(int argc, char ** argv) {
 
 	return 1;
 }
+
+
+
+
