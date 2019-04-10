@@ -37,5 +37,6 @@ void frameDraw(CoordinateFrame reference);
 
 void frameBufferData(CoordinateFrame reference);
 
+void frameBazierPatch(CoordinateFrame reference, Point * points, int tesselation);
 
 #endif

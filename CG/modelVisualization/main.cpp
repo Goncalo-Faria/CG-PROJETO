@@ -105,6 +105,7 @@ int main(int argc, char ** argv) {
 		cout << "No scene file provided." << endl;
 		return 2;
 	}
+	
 	mainframe = parse(argv[1]);
 	if (!mainframe) {
 		return 3;

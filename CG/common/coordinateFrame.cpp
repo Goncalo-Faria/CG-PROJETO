@@ -27,7 +27,7 @@ using namespace std;
 
 typedef struct frame { 
 	double t[4][4];
-	vector<Point> points;
+	vector<Point>* points;
 	struct frame * ref;
 	GLuint buffer;
 } *CoordinateFrame;
@@ -42,7 +42,7 @@ void frameRotate(CoordinateFrame m, double angle, double vx, double vy, double v
 void frameTranslate(CoordinateFrame m, double x, double y, double z);
 void frameScale(CoordinateFrame m, double vx, double vy, double vz );
 
-void framePoint(CoordinateFrame m, double x, double y, double z);
+void frameBazierPatch(CoordinateFrame reference, Point * points, int tesselation);
 void frameTriangle(CoordinateFrame m, double angle, double difs);
 void frameRegularPolygon(CoordinateFrame reference,int points);
 
@@ -80,7 +80,7 @@ void frameTrace(CoordinateFrame m, char* filename, char* figure){
     XMLNode* major = doc.InsertEndChild( doc.NewElement(figure) );
     XMLElement* triangle,*point;
     XMLNode* nTriangle;
-    for (Point p : m->points){
+    for (Point p : *m->points){
         if(!(count%3) ){
             triangle = doc.NewElement( "triangle" );
             nTriangle = major->InsertEndChild( triangle );
@@ -106,36 +106,40 @@ CoordinateFrame mkCoordinateFrame(){
 	
 	m->ref = NULL;
 	m->buffer= -1;
-	//printf("mk %d \n",m);
+	m->points = new vector<Point>();
 
 	return m;
 }
 
 void unmkCoordinateFrame(CoordinateFrame m){
-
-	//sprintf("unmk %d \n",m);
+    if( m->points != NULL)
+        delete m->points;
     free(m);
 }
 
 CoordinateFrame mkCoordinateFrame(CoordinateFrame mold){
-	auto m = (CoordinateFrame) malloc( sizeof(struct frame) );
+	CoordinateFrame m = (CoordinateFrame) malloc( sizeof(struct frame) );
 	for(int i = 0; i< 4; i++)
 		for( int j=0; j<4; j++)
 			m->t[i][j] = mold->t[i][j];
 	
 	m->ref = mold;
 	m->buffer= -1;
-
-	//printf("mk %d \n",m);
+    m->points = NULL;
 
 	return m;
 }
 
 void frameReference(CoordinateFrame  m, Point p){
-	if( !m->ref )
-		m->points.push_back(p);
-	else
-		frameReference(m->ref,p);	
+
+	if( !m->ref ) {
+	    //printf("ka ");
+        m->points->push_back(p);
+        //printf("bomm \n");
+    }else {
+        //printf("oo ");
+        frameReference(m->ref, p);
+    }
 }
 
 CoordinateFrame mkCoordinateFrameRx(double angle){
@@ -253,7 +257,7 @@ void framePoint(CoordinateFrame m, double x, double y, double z){
 
 	Point * po = mkPoint(a[0], a[1], a[2]);
 	frameReference(m, *po );
-	free(po);
+	unmkPoint(po);
 }
 
 void frameTriangle(CoordinateFrame m, double angle, double difs){
@@ -385,17 +389,18 @@ void frameRegularPolygon(CoordinateFrame reference,int points){
 void frameDraw(CoordinateFrame reference){
 	glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);
 	glVertexPointer(3,GL_DOUBLE,0,0);
-	glDrawArrays(GL_TRIANGLES, 0, reference->points.size());
+	glDrawArrays(GL_TRIANGLES, 0, reference->points->size());
 }
 
 void frameBufferData(CoordinateFrame reference){
+	
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glGenBuffers(1, &(reference->buffer) );
 	glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);
 	glBufferData(
 		GL_ARRAY_BUFFER,
-		reference->points.size() * sizeof(Point),
-		&(reference->points[0]),
+		reference->points->size() * sizeof(Point),
+		&( (*(reference->points))[0] ),
 		GL_STATIC_DRAW
 	);
 }
@@ -484,6 +489,131 @@ vector<string> split(string strToSplit, char delimeter)
 	}
 
 	return splittedStrings;
+}
+
+int factorial(int n){ return (n < 2) ? 1 : n*factorial(n-1); }
+
+double bernstein(int i, int n, double t){
+	double r = (double) factorial(n) / (double) (factorial(i) * factorial(n - i));
+	r *= pow(t,i);
+	r *= pow(1-t,n-i);
+	return r;
+}
+
+void frameBazierPatch(CoordinateFrame reference, Point * points, int tesselation){
+
+	Point curvePoints[tesselation+1][tesselation+1];
+
+	for(int ui = 0; ui <= tesselation; ui++){
+		double u = double(ui)/double(tesselation);
+		for(int vi = 0; vi <= tesselation; vi++){
+			double v = double(vi)/double(tesselation);
+			Point point;
+			point.p[0] = 0;
+			point.p[1] = 0;
+			point.p[2] = 0;
+			for(int m = 0; m < 4; m++){
+				for(int n =0; n< 4; n++){
+					double bm = bernstein(m, 3, u);
+					double bn = bernstein(n, 3, v);
+					double b = bm * bn;
+					point.p[0] += b *  points[4*m + n].p[0];
+					point.p[1] += b *  points[4*m + n].p[1];
+					point.p[2] += b *  points[4*m + n].p[2];
+				}
+			}
+			curvePoints[ui][vi] = point;
+		}
+	}
+
+	for(int ui = 0; ui < tesselation; ui++) 
+        for(int vi = 0; vi < tesselation; vi++) {
+
+            framePoint(
+                    reference,
+                    curvePoints[ui][vi+1].p[0],
+                    curvePoints[ui][vi+1].p[1],
+                    curvePoints[ui][vi+1].p[2]);
+
+            framePoint(
+                    reference,
+                    curvePoints[ui+1][vi].p[0],
+                    curvePoints[ui+1][vi].p[1],
+                    curvePoints[ui+1][vi].p[2]);
+
+            framePoint(
+                    reference,
+                    curvePoints[ui][vi].p[0],
+                    curvePoints[ui][vi].p[1],
+                    curvePoints[ui][vi].p[2]);
+
+			// sencond triangle
+            /*
+            framePoint(
+                    reference,
+                    curvePoints[ui][vi+1].p[0],
+                    curvePoints[ui][vi+1].p[1],
+                    curvePoints[ui][vi+1].p[2]);
+
+            framePoint(
+                    reference,
+                    curvePoints[ui+1][vi].p[0],
+                    curvePoints[ui+1][vi].p[1],
+                    curvePoints[ui+1][vi].p[2]);
+
+
+
+            framePoint(
+                    reference,
+                    curvePoints[ui+1][vi+1].p[0],
+                    curvePoints[ui+1][vi+1].p[1],
+                    curvePoints[ui+1][vi+1].p[2]);
+            */
+
+            // third
+            framePoint(
+                    reference,
+                    curvePoints[ui+1][vi].p[0],
+                    curvePoints[ui+1][vi].p[1],
+                    curvePoints[ui+1][vi].p[2]);
+
+
+            framePoint(
+                    reference,
+                    curvePoints[ui][vi+1].p[0],
+                    curvePoints[ui][vi+1].p[1],
+                    curvePoints[ui][vi+1].p[2]);
+
+            framePoint(
+                    reference,
+                    curvePoints[ui+1][vi+1].p[0],
+                    curvePoints[ui+1][vi+1].p[1],
+                    curvePoints[ui+1][vi+1].p[2]);
+            // forth
+            /*
+            framePoint(
+                    reference,
+                    curvePoints[ui+1][vi].p[0],
+                    curvePoints[ui+1][vi].p[1],
+                    curvePoints[ui+1][vi].p[2]);
+
+
+            framePoint(
+                    reference,
+                    curvePoints[ui][vi+1].p[0],
+                    curvePoints[ui][vi+1].p[1],
+                    curvePoints[ui][vi+1].p[2]);
+
+            framePoint(
+                    reference,
+                    curvePoints[ui][vi].p[0],
+                    curvePoints[ui][vi].p[1],
+                    curvePoints[ui][vi].p[2]);
+
+			*/
+
+        }
+	
 }
 
 void parseModel(const char * filename, CoordinateFrame state) {

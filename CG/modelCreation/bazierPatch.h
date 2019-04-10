@@ -10,4 +10,8 @@ BazierPatch mkBazierPatch( FILE* source );
 
 void unmkBazierPatch(BazierPatch m);
 
+int getNumPatches(BazierPatch bazier);
+
+Point * getPatch(BazierPatch bazier, int ind);
+
 #endif
