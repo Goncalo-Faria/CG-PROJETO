@@ -108,6 +108,7 @@ int main(int argc, char ** argv) {
 	
 	mainframe = parse(argv[1]);
 	if (!mainframe) {
+        cout << "File not found" << endl;
 		return 3;
 	}
 

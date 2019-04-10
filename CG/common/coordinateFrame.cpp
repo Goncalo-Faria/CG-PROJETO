@@ -461,8 +461,10 @@ CoordinateFrame parse(const char * filename) {
 	XMLError eResult = 
 		xml_doc.LoadFile(filename);
 
-	if (eResult != XML_SUCCESS)
-		return NULL;
+	if (eResult != XML_SUCCESS) {
+        //cout << "parse" << endl;
+        return NULL;
+    }
 
 	XMLNode* root = xml_doc.FirstChildElement("scene");
 
@@ -501,13 +503,18 @@ double bernstein(int i, int n, double t){
 }
 
 void frameBazierPatch(CoordinateFrame reference, Point * points, int tesselation){
-
+    /*superfice de bazie com bicubic patches (4,4)
+     *
+     * Uma forma numericamente estavel de fazer o algoritmo de casteljau's
+     * através de polinomis na forma Bernstein
+     *
+     * */
 	Point curvePoints[tesselation+1][tesselation+1];
 
 	for(int ui = 0; ui <= tesselation; ui++){
-		double u = double(ui)/double(tesselation);
+		double u = double(ui)/double(tesselation);// calcular ut
 		for(int vi = 0; vi <= tesselation; vi++){
-			double v = double(vi)/double(tesselation);
+			double v = double(vi)/double(tesselation);// calcular vt
 			Point point;
 			point.p[0] = 0;
 			point.p[1] = 0;
@@ -516,7 +523,7 @@ void frameBazierPatch(CoordinateFrame reference, Point * points, int tesselation
 				for(int n =0; n< 4; n++){
 					double bm = bernstein(m, 3, u);
 					double bn = bernstein(n, 3, v);
-					double b = bm * bn;
+					double b = bm * bn;// calculo do coeficiente da formula
 					point.p[0] += b *  points[4*m + n].p[0];
 					point.p[1] += b *  points[4*m + n].p[1];
 					point.p[2] += b *  points[4*m + n].p[2];
