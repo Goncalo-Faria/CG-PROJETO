@@ -1,35 +1,33 @@
 #define _USE_MATH_DEFINES
 
-#include <math.h>
-#include <cstdio>
-#include <cstdlib>
-#include "coordinateFrame.h"
-#include "tinyxml2.h"
-
-#include <vector>
-#include <tuple>
-
 #if defined(_WIN32)
     #include "GL/glut.h"
 #else
-    #include <GLUT/glut.h>
-#include <iostream>
-
+	#include <GLUT/glut.h>
 #endif
+
+#include "coordinateFrame.h"
+#include "tinyxml2.h"
+#include <math.h>
+#include <cstdio>
+#include <cstdlib>
+#include <vector>
+#include <tuple>
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <tuple>
 
 #define back(X,Y) unmkCoordinateFrame(X);X = mkCoordinateFrame(Y)
 
 using namespace tinyxml2; 
 using namespace std;
 
-typedef struct point {
-	double p[3];
-} Point;
-
-
 typedef struct frame { 
 	double t[4][4];
-	vector<Point> points;
+	vector<Point>* points;
 	struct frame * ref;
 	GLuint buffer;
 } *CoordinateFrame;
@@ -44,7 +42,7 @@ void frameRotate(CoordinateFrame m, double angle, double vx, double vy, double v
 void frameTranslate(CoordinateFrame m, double x, double y, double z);
 void frameScale(CoordinateFrame m, double vx, double vy, double vz );
 
-void framePoint(CoordinateFrame m, double x, double y, double z);
+void frameBazierPatch(CoordinateFrame reference, Point * points, int tesselation);
 void frameTriangle(CoordinateFrame m, double angle, double difs);
 void frameRegularPolygon(CoordinateFrame reference,int points);
 
@@ -56,9 +54,9 @@ void frameTrace(CoordinateFrame m, char* filename, char* figure);
 void frameDraw(CoordinateFrame reference);
 void frameBufferData(CoordinateFrame reference);
 
+CoordinateFrame parse(const char * filename);
+
 /*Internal auxiliary procedures*/
-Point* mkPoint(double x, double y, double z);
-void unmkPoint(Point* p);
 
 CoordinateFrame mkCoordinateFrameRx(double angle);
 CoordinateFrame mkCoordinateFrameRy(double angle);
@@ -69,19 +67,11 @@ void frameAggregate(CoordinateFrame a, CoordinateFrame b);
 void plataform(CoordinateFrame reference, int points, double bottomradius, double topradius, int downface, int upface);
 void plane(CoordinateFrame reference);
 
+CoordinateFrame parseGroups(XMLNode * group, CoordinateFrame state);
+void parseModel(const char * filename, CoordinateFrame state);
+vector<string> split(string strToSplit, char delimeter);
+
 /* Implementation */
-
-Point* mkPoint(double x, double y, double z){
-	Point* m = (Point*) malloc( sizeof(struct point) );
-	m->p[0] = x;
-	m->p[1] = y;
-	m->p[2] = z;
-	return m;
-}
-
-void unmkPoint(Point* p){
-	free(p);
-}
 
 void frameTrace(CoordinateFrame m, char* filename, char* figure){
     int count=0;
@@ -90,7 +80,7 @@ void frameTrace(CoordinateFrame m, char* filename, char* figure){
     XMLNode* major = doc.InsertEndChild( doc.NewElement(figure) );
     XMLElement* triangle,*point;
     XMLNode* nTriangle;
-    for (Point p : m->points){
+    for (Point p : *m->points){
         if(!(count%3) ){
             triangle = doc.NewElement( "triangle" );
             nTriangle = major->InsertEndChild( triangle );
@@ -116,36 +106,40 @@ CoordinateFrame mkCoordinateFrame(){
 	
 	m->ref = NULL;
 	m->buffer= -1;
-	//printf("mk %d \n",m);
+	m->points = new vector<Point>();
 
 	return m;
 }
 
 void unmkCoordinateFrame(CoordinateFrame m){
-
-	//sprintf("unmk %d \n",m);
+    if( m->points != NULL)
+        delete m->points;
     free(m);
 }
 
 CoordinateFrame mkCoordinateFrame(CoordinateFrame mold){
-	auto m = (CoordinateFrame) malloc( sizeof(struct frame) );
+	CoordinateFrame m = (CoordinateFrame) malloc( sizeof(struct frame) );
 	for(int i = 0; i< 4; i++)
 		for( int j=0; j<4; j++)
 			m->t[i][j] = mold->t[i][j];
 	
 	m->ref = mold;
 	m->buffer= -1;
-
-	//printf("mk %d \n",m);
+    m->points = NULL;
 
 	return m;
 }
 
 void frameReference(CoordinateFrame  m, Point p){
-	if( !m->ref )
-		m->points.push_back(p);
-	else
-		frameReference(m->ref,p);	
+
+	if( !m->ref ) {
+	    //printf("ka ");
+        m->points->push_back(p);
+        //printf("bomm \n");
+    }else {
+        //printf("oo ");
+        frameReference(m->ref, p);
+    }
 }
 
 CoordinateFrame mkCoordinateFrameRx(double angle){
@@ -263,7 +257,7 @@ void framePoint(CoordinateFrame m, double x, double y, double z){
 
 	Point * po = mkPoint(a[0], a[1], a[2]);
 	frameReference(m, *po );
-	free(po);
+	unmkPoint(po);
 }
 
 void frameTriangle(CoordinateFrame m, double angle, double difs){
@@ -393,25 +387,252 @@ void frameRegularPolygon(CoordinateFrame reference,int points){
 }
 
 void frameDraw(CoordinateFrame reference){
-	//for(Point value : reference->points ) {
-	//glColor3f(rand() / double(RAND_MAX), rand() / double(RAND_MAX), rand() / double(RAND_MAX));
-	//	glVertex3f(value.p[0], value.p[1], value.p[2]);
-	//}
-
 	glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);
 	glVertexPointer(3,GL_DOUBLE,0,0);
-	glDrawArrays(GL_TRIANGLES, 0, reference->points.size());
-
+	glDrawArrays(GL_TRIANGLES, 0, reference->points->size());
 }
 
 void frameBufferData(CoordinateFrame reference){
+	
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glGenBuffers(1, &(reference->buffer) );
 	glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);
 	glBufferData(
 		GL_ARRAY_BUFFER,
-		reference->points.size() * sizeof(Point),
-		&(reference->points[0]),
+		reference->points->size() * sizeof(Point),
+		&( (*(reference->points))[0] ),
 		GL_STATIC_DRAW
 	);
+}
+
+CoordinateFrame parseGroups(XMLNode * group, CoordinateFrame state){
+
+	for(XMLNode * g = group->FirstChild();
+		g != nullptr;
+		g = g->NextSibling()
+		)
+	{
+		const char * name = g->Value();
+		if(!strcmp(name,"models")){
+			XMLElement * e = g->FirstChildElement("model");
+	
+			while(e != nullptr) {
+				parseModel(e->Attribute("file"),state);
+				e = e->NextSiblingElement("model");
+			}
+		}else if(!strcmp(name,"translate")){
+
+			XMLElement *e = (XMLElement*) g;
+			frameTranslate(	state,
+					 	   	e->DoubleAttribute("X"),
+							e->DoubleAttribute("Y"),
+							e->DoubleAttribute("Z")
+							);
+		}else if(!strcmp(name,"rotate")){
+			
+			XMLElement *e = (XMLElement*) g;
+			frameRotate(state,
+						e->DoubleAttribute("angle"),
+						e->DoubleAttribute("axisX"),
+						e->DoubleAttribute("axisY"),
+						e->DoubleAttribute("axisZ")
+						);
+		}else if(!strcmp(name,"scale")){
+		
+			XMLElement *e = (XMLElement*) g;
+			frameScale(state,
+							   e->DoubleAttribute("stretchX", 1.0),
+							   e->DoubleAttribute("stretchY", 1.0),
+							   e->DoubleAttribute("stretchZ", 1.0)
+			);
+		
+		}else if(!strcmp(name,"group")){
+			unmkCoordinateFrame(parseGroups(g, mkCoordinateFrame(state)));
+		}
+	
+	}
+
+	return state;
+}
+
+CoordinateFrame parse(const char * filename) {
+	XMLDocument xml_doc;
+	//cout << "parse" << endl;
+	XMLError eResult = 
+		xml_doc.LoadFile(filename);
+
+	if (eResult != XML_SUCCESS) {
+        //cout << "parse" << endl;
+        return NULL;
+    }
+
+	XMLNode* root = xml_doc.FirstChildElement("scene");
+
+	if (root == nullptr)
+		return NULL;
+	
+	CoordinateFrame frame = mkCoordinateFrame();
+
+	frame = parseGroups(root, frame);
+
+	xml_doc.Clear();
+
+	return frame;
+}
+
+vector<string> split(string strToSplit, char delimeter)
+{
+	stringstream ss(strToSplit);
+	string item;
+	vector<string> splittedStrings;
+
+	while (getline(ss, item, delimeter)){
+		splittedStrings.push_back(item);
+	}
+
+	return splittedStrings;
+}
+
+int factorial(int n){ return (n < 2) ? 1 : n*factorial(n-1); }
+
+double bernstein(int i, int n, double t){
+	double r = (double) factorial(n) / (double) (factorial(i) * factorial(n - i));
+	r *= pow(t,i);
+	r *= pow(1-t,n-i);
+	return r;
+}
+
+void frameBazierPatch(CoordinateFrame reference, Point * points, int tesselation){
+    /*superfice de bazie com bicubic patches (4,4)
+     *
+     * Uma forma numericamente estavel de fazer o algoritmo de casteljau's
+     * através de polinomis na forma Bernstein
+     *
+     * */
+	Point curvePoints[tesselation+1][tesselation+1];
+
+	for(int ui = 0; ui <= tesselation; ui++){
+		double u = double(ui)/double(tesselation);// calcular ut
+		for(int vi = 0; vi <= tesselation; vi++){
+			double v = double(vi)/double(tesselation);// calcular vt
+			Point point;
+			point.p[0] = 0;
+			point.p[1] = 0;
+			point.p[2] = 0;
+			for(int m = 0; m < 4; m++){
+				for(int n =0; n< 4; n++){
+					double bm = bernstein(m, 3, u);
+					double bn = bernstein(n, 3, v);
+					double b = bm * bn;// calculo do coeficiente da formula
+					point.p[0] += b *  points[4*m + n].p[0];
+					point.p[1] += b *  points[4*m + n].p[1];
+					point.p[2] += b *  points[4*m + n].p[2];
+				}
+			}
+			curvePoints[ui][vi] = point;
+		}
+	}
+
+	for(int ui = 0; ui < tesselation; ui++) 
+        for(int vi = 0; vi < tesselation; vi++) {
+
+            framePoint(
+                    reference,
+                    curvePoints[ui][vi+1].p[0],
+                    curvePoints[ui][vi+1].p[1],
+                    curvePoints[ui][vi+1].p[2]);
+
+            framePoint(
+                    reference,
+                    curvePoints[ui+1][vi].p[0],
+                    curvePoints[ui+1][vi].p[1],
+                    curvePoints[ui+1][vi].p[2]);
+
+            framePoint(
+                    reference,
+                    curvePoints[ui][vi].p[0],
+                    curvePoints[ui][vi].p[1],
+                    curvePoints[ui][vi].p[2]);
+
+			// sencond triangle
+            /*
+            framePoint(
+                    reference,
+                    curvePoints[ui][vi+1].p[0],
+                    curvePoints[ui][vi+1].p[1],
+                    curvePoints[ui][vi+1].p[2]);
+
+            framePoint(
+                    reference,
+                    curvePoints[ui+1][vi].p[0],
+                    curvePoints[ui+1][vi].p[1],
+                    curvePoints[ui+1][vi].p[2]);
+
+
+
+            framePoint(
+                    reference,
+                    curvePoints[ui+1][vi+1].p[0],
+                    curvePoints[ui+1][vi+1].p[1],
+                    curvePoints[ui+1][vi+1].p[2]);
+            */
+
+            // third
+            framePoint(
+                    reference,
+                    curvePoints[ui+1][vi].p[0],
+                    curvePoints[ui+1][vi].p[1],
+                    curvePoints[ui+1][vi].p[2]);
+
+
+            framePoint(
+                    reference,
+                    curvePoints[ui][vi+1].p[0],
+                    curvePoints[ui][vi+1].p[1],
+                    curvePoints[ui][vi+1].p[2]);
+
+            framePoint(
+                    reference,
+                    curvePoints[ui+1][vi+1].p[0],
+                    curvePoints[ui+1][vi+1].p[1],
+                    curvePoints[ui+1][vi+1].p[2]);
+            // forth
+            /*
+            framePoint(
+                    reference,
+                    curvePoints[ui+1][vi].p[0],
+                    curvePoints[ui+1][vi].p[1],
+                    curvePoints[ui+1][vi].p[2]);
+
+
+            framePoint(
+                    reference,
+                    curvePoints[ui][vi+1].p[0],
+                    curvePoints[ui][vi+1].p[1],
+                    curvePoints[ui][vi+1].p[2]);
+
+            framePoint(
+                    reference,
+                    curvePoints[ui][vi].p[0],
+                    curvePoints[ui][vi].p[1],
+                    curvePoints[ui][vi].p[2]);
+
+			*/
+
+        }
+	
+}
+
+void parseModel(const char * filename, CoordinateFrame state) {
+	ifstream file(filename);
+	if (file.is_open()) {
+		string line;
+		while (getline(file, line)) {
+			if (line.find("point") != string::npos) {
+				vector<string> s = split(line, '"');
+				framePoint(state, stod(s.at(1)), stod(s.at(3)), stod(s.at(5)));
+			}
+		}
+		file.close();
+	}
 }

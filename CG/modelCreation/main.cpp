@@ -12,7 +12,8 @@
 
 #endif
 
-#include "coordinateFrame.h"
+#include "../common/coordinateFrame.h"
+#include "bazierPatch.h"
 
 double lin(double dh){
     return (1 - dh);
@@ -80,6 +81,38 @@ char * createCone(int argc, char **argv, CoordinateFrame reference) {
     return argv[6];
 }
 
+char * createBazierSurface(int argc, char **argv, CoordinateFrame reference){
+    if(argc < 4) notEnoughArguments();
+
+    FILE* fdes = fopen(argv[2],"r");
+
+    if( fdes == NULL){
+        std::cout << "Patch file not found";
+        exit(2);
+    }
+
+    BazierPatch patch = mkBazierPatch(fdes);
+    fclose(fdes);
+
+    Point * points;
+    int tesselation = atoi(argv[3]);
+    
+    //printf(" starting \n");
+    for(int i = 0; i < getNumPatches(patch) ; i++){
+        //printf("t1 %d ", i );
+        points = getPatch(patch,i);
+        //printf("t2 %d ", i );
+        frameBazierPatch(reference, points, tesselation);
+        //printf("t3 %d \n", i );
+        free(points);
+    }
+
+    //printf(" got it \n");
+
+    unmkBazierPatch(patch);
+    return argv[4];
+}
+
 char * parseInput(int argc, char **argv, CoordinateFrame reference) {
     if(strcmp(argv[1], "plane") == 0) {
         frameHyperplane(reference,1);
@@ -90,6 +123,8 @@ char * parseInput(int argc, char **argv, CoordinateFrame reference) {
         return createSphere(argc, argv, reference);
     } else if(strcmp(argv[1], "cone") == 0) {
         return createCone(argc, argv, reference);
+    } else if(!strcmp(argv[1],"bazier")){
+        return createBazierSurface(argc, argv,reference);
     } else {
         std::cout << "Unknown model";
         exit(2);
@@ -100,8 +135,9 @@ int main(int argc, char **argv) {
     if(argc == 1) notEnoughArguments();
 
     CoordinateFrame reference = mkCoordinateFrame();
+    
     char * filename = parseInput(argc, argv, reference);
-
+    
     frameTrace(reference, filename, "figure");
     unmkCoordinateFrame(reference);
 

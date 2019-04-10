@@ -1,11 +1,15 @@
 #ifndef coordinateFrame_h
 #define coordinateFrame_h
 
+#include "point.h"
+
 typedef struct frame *CoordinateFrame;
 
 CoordinateFrame mkCoordinateFrame();
 
 CoordinateFrame mkCoordinateFrame(CoordinateFrame mold);
+
+CoordinateFrame parse(const char * filename);
 
 void unmkCoordinateFrame(CoordinateFrame m);
 
@@ -32,5 +36,7 @@ void frameTrace(CoordinateFrame m, char* filename, char* figure);
 void frameDraw(CoordinateFrame reference);
 
 void frameBufferData(CoordinateFrame reference);
+
+void frameBazierPatch(CoordinateFrame reference, Point * points, int tesselation);
 
 #endif
