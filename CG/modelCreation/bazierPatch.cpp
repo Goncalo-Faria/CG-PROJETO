@@ -4,7 +4,6 @@
 #include <list>
 #include <array>
 
-
 using namespace std;
 
 typedef struct patch {
@@ -31,8 +30,6 @@ BazierPatch mkBazierPatch( FILE* source ){
     BazierPatch patch = (BazierPatch)malloc(sizeof(struct patch));
     fscanf(source,"%d",&(patch->numPatches));
 
-    //printf("%d \n",patch->numPatches);
-
     int ** v = (int**)malloc(sizeof(int*)*patch->numPatches);
 
 
@@ -46,56 +43,39 @@ BazierPatch mkBazierPatch( FILE* source ){
 
             v[i][j] = tmp;
 
-            //printf("%d, ",tmp);
         }
 
         fscanf(source,"%d",&tmp);
         
-        v[i][15] = tmp;
-
-        //printf("%d \n",tmp);
-        
+        v[i][15] = tmp;        
 
     }
 
     patch->indices = v;
-
-        //printf("go\n");
 
     fscanf(source,"%d",&(patch->numCtrlPoints));
 
     patch->ctrlPoints = (Point*) malloc( sizeof(Point) * patch->numCtrlPoints );
 
     for( int i = 0; i< patch->numCtrlPoints; i++ ){
-        double pv[3];
+        float pv[3];
         float tmp1;
         for(int j = 0 ; j < 3 - 1; j++){
             fscanf(source,"%f, ",&tmp1);
-            pv[j] = (double) tmp1;    
+            pv[j] = tmp1;    
 
-            //printf(" %d | ",j);
         }
 
         fscanf(source,"%f",&tmp1);
-        pv[2] = (double) tmp1; 
+        pv[2] = tmp1; 
 
         Point* point =  mkPoint(pv[0],pv[1],pv[2]);
 
-        //printf(" %f :: %f :: %f \n", (float) pv[0], (float) pv[1], (float) pv[2]);
-        
-        //printf("%d \n",i);
-
         patch->ctrlPoints[i] = *point;
-
-        //printf(" %f :: %f :: %f \n", (float)patch->ctrlPoints[i].p[0], (float)patch->ctrlPoints[i].p[1], (float)patch->ctrlPoints[i].p[2]);
-
 
         unmkPoint(point);
 
     }
-
-        //printf("its working \n");
-
     return patch;
 }
 
@@ -106,17 +86,13 @@ void unmkBazierPatch(BazierPatch m){
 Point * getPatch(BazierPatch bazier, int ind){
     
     Point * r = (Point*)malloc(sizeof(Point) * 16);
-    //printf(" aftermalloc : ");
     for(int i= 0; i< 16; i++)
         r[i] = bazier->ctrlPoints[bazier->indices[ind][i]];
-
-    //printf(" end: \n");
 
     return r;
 }
 
 int getNumPatches(BazierPatch bazier){
-    //printf(" fail : ");
-    //printf("%d \n",bazier->numPatches);
+
     return bazier->numPatches;
 }

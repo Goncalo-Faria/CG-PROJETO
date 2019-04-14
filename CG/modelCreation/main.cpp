@@ -13,17 +13,18 @@
 #endif
 
 #include "../common/coordinateFrame.h"
+#include "framePrimitives.h"
 #include "bazierPatch.h"
 
-double lin(double dh){
+float lin(float dh){
     return (1 - dh);
 }
 
-double smartshephere(double dh){
+float smartshephere(float dh){
 	return sqrt( 1 - pow(1 - 2*dh,2) + 1e-7);
 }
 
-void sphere(CoordinateFrame reference, double radius, int slices, int stacks) {
+void sphere(CoordinateFrame reference, float radius, int slices, int stacks) {
 	CoordinateFrame nw = mkCoordinateFrame(reference);
 
 	frameScale(nw, radius, 2 * radius, radius);
@@ -33,7 +34,7 @@ void sphere(CoordinateFrame reference, double radius, int slices, int stacks) {
 	unmkCoordinateFrame(nw);
 }
 
-void cone(CoordinateFrame reference, double radius, double height, int slices, int stacks) {
+void cone(CoordinateFrame reference, float radius, float height, int slices, int stacks) {
     CoordinateFrame nw = mkCoordinateFrame(reference);
     frameScale(nw, radius, height, radius);
     frameStacker(nw, slices, stacks, lin);
@@ -97,17 +98,11 @@ char * createBazierSurface(int argc, char **argv, CoordinateFrame reference){
     Point * points;
     int tesselation = atoi(argv[3]);
     
-    //printf(" starting \n");
     for(int i = 0; i < getNumPatches(patch) ; i++){
-        //printf("t1 %d ", i );
         points = getPatch(patch,i);
-        //printf("t2 %d ", i );
         frameBazierPatch(reference, points, tesselation);
-        //printf("t3 %d \n", i );
         free(points);
     }
-
-    //printf(" got it \n");
 
     unmkBazierPatch(patch);
     return argv[4];

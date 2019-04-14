@@ -106,7 +106,7 @@ int main(int argc, char ** argv) {
 		return 2;
 	}
 	
-	mainframe = parse(argv[1]);
+	mainframe = mkCoordinateFrame(argv[1]);
 	if (!mainframe) {
         cout << "File not found" << endl;
 		return 3;

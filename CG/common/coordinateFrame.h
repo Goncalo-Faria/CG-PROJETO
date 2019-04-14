@@ -9,27 +9,19 @@ CoordinateFrame mkCoordinateFrame();
 
 CoordinateFrame mkCoordinateFrame(CoordinateFrame mold);
 
-CoordinateFrame parse(const char * filename);
+CoordinateFrame mkCoordinateFrame(const char * filename);
 
 void unmkCoordinateFrame(CoordinateFrame m);
 
-void frameRotate(CoordinateFrame m, double angle, double vx, double vy, double vz);
+void frameRotate(CoordinateFrame m, float angle, float vx, float vy, float vz);
 
-void frameTranslate(CoordinateFrame m, double x, double y, double z);
+void frameTranslate(CoordinateFrame m, float x, float y, float z);
 
-void frameScale(CoordinateFrame m, double vx, double vy, double vz );
+void frameScale(CoordinateFrame m, float vx, float vy, float vz );
 
-void framePoint(CoordinateFrame m, double x, double y, double z);
+void framePoint(CoordinateFrame m, float x, float y, float z);
 
-void frameTriangle(CoordinateFrame m, double angle, double difs);
-
-void frameStacker(CoordinateFrame reference, int points, int stacks, double (*f)(double));
-
-void frameHyperplane(CoordinateFrame reference, int divisions);
-
-void frameCube(CoordinateFrame reference, int divisions);
-
-void frameRegularPolygon(CoordinateFrame reference,int points);
+void frameTriangle(CoordinateFrame m, float angle, float difs);
 
 void frameTrace(CoordinateFrame m, char* filename, char* figure);
 
@@ -38,5 +30,6 @@ void frameDraw(CoordinateFrame reference);
 void frameBufferData(CoordinateFrame reference);
 
 void frameBazierPatch(CoordinateFrame reference, Point * points, int tesselation);
+
 
 #endif
