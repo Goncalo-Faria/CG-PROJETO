@@ -80,6 +80,11 @@ BazierPatch mkBazierPatch( FILE* source ){
 }
 
 void unmkBazierPatch(BazierPatch m){
+    for(int i=0; i< m->numPatches; i++)
+        free(m->indices[i]);
+
+    free(m->indices);
+    free(m->ctrlPoints);
     free(m);
 }
 

@@ -7,8 +7,8 @@
 #endif
 
 #include "coordinateFrame.h"
-#include "tinyxml2.h"
-#include "matop.h"
+#include "../common/tinyxml2.h"
+#include "../common/matop.h"
 #include <math.h>
 #include <cstdio>
 #include <cstdlib>

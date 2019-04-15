@@ -1,7 +1,7 @@
 #ifndef coordinateFrame_h
 #define coordinateFrame_h
 
-#include "point.h"
+#include "../common/point.h"
 
 typedef struct frame *CoordinateFrame;
 
@@ -24,12 +24,5 @@ void framePoint(CoordinateFrame m, float x, float y, float z);
 void frameTriangle(CoordinateFrame m, float angle, float difs);
 
 void frameTrace(CoordinateFrame m, char* filename, char* figure);
-
-void frameDraw(CoordinateFrame reference);
-
-void frameBufferData(CoordinateFrame reference);
-
-void frameBazierPatch(CoordinateFrame reference, Point * points, int tesselation);
-
 
 #endif

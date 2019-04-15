@@ -1,7 +1,7 @@
 #ifndef primitive_h
 #define primitive_h
 
-#import "../common/coordinateFrame.h"
+#import "coordinateFrame.h"
 
 void frameStacker(CoordinateFrame reference, int points, int stacks, float (*f)(float) );
 void frameHyperplane(CoordinateFrame reference, int divisions);

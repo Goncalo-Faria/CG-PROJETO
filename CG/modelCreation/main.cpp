@@ -12,7 +12,7 @@
 
 #endif
 
-#include "../common/coordinateFrame.h"
+#include "coordinateFrame.h"
 #include "framePrimitives.h"
 #include "bazierPatch.h"
 
