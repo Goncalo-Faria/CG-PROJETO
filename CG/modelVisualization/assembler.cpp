@@ -25,6 +25,8 @@ typedef struct assembler{
     GLuint buffer;
 } *Assembler;
 
+Point * outbuffer;
+
 void parseModel(const char * filename, Assembler state);
 Assembler parseGroups(XMLNode * group, Assembler state);
 vector<string> split(string strToSplit, char delimeter);
@@ -170,6 +172,7 @@ void unmkAssembler( Assembler target ){
 	if( target->root.type != FAKE ){
 		unmkBranch(target->root);
 		delete target->points;
+        glDeleteBuffers(1, &target->buffer);
 	}
 	free(target);
 }
@@ -300,21 +303,48 @@ Assembler parseGroups(XMLNode * group, Assembler state)
 	return state;
 }
 
+void assemblerInterpret(Assembler reference){
+
+    branchInterpret(&(reference->root), reference->points ,outbuffer);
+
+}
+
 void assemblerDraw(Assembler reference){
+    assemblerInterpret(reference);
+
+    //assemb
+
     glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);
+    glBufferData(
+            GL_ARRAY_BUFFER,
+            reference->points->size() * sizeof(Point),
+            outbuffer,
+            GL_DYNAMIC_DRAW
+    );
     glVertexPointer(3,GL_FLOAT,0,0);
     glDrawArrays(GL_TRIANGLES, 0, reference->points->size());
 }
 
 void assemblerBufferData(Assembler reference){
+
+    //<<<< branchOptimize.
+
+    outbuffer = (Point*)malloc( sizeof(Point) * reference->points->size());
+    //memcpy( outbuffer ,reference->points->data(), sizeof(Point) * reference->points->size() );
+
     glEnableClientState(GL_VERTEX_ARRAY);
     glGenBuffers(1, &(reference->buffer) );
     glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);
     glBufferData(
             GL_ARRAY_BUFFER,
             reference->points->size() * sizeof(Point),
-            &( (*(reference->points))[0] ),
-            GL_STATIC_DRAW
+            outbuffer,
+            GL_DYNAMIC_DRAW
     );
+    // &((*(reference->points))[0])
+}
+
+void assemblerClear(){
+    free(outbuffer);
 }
 

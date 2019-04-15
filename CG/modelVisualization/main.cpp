@@ -114,6 +114,7 @@ int main(int argc, char ** argv) {
 	glut(argc, argv);
 
 	unmkAssembler(mainframe);
+    assemblerClear();
 
 	return 1;
 }

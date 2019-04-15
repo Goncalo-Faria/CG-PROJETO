@@ -16,6 +16,9 @@
 
 using namespace std;
 
+#define max(A,B) (A > B) ? A : B;
+#define min(A,B) (A < B) ? A : B;
+
 typedef struct animation{
     vector< Branch > * subbranch;
     float period;
@@ -237,4 +240,105 @@ void unmkBranch( struct branch b ){
 void unmkBranch( Branch b ){
     unmkBranch(*b);
     free(b);
+}
+
+void applyAnimation( Animation animation, Point* outgoing, long start, long end){
+
+
+}
+
+void applyTransformation( Transformation transformation, Point* outgoing, long start, long end){
+
+    Point point;
+    float p[4];
+
+    p[3] = 1;
+
+    for( long s = start; s< end; s++ ){
+        p[0] = outgoing[s].p[0];
+        p[1] = outgoing[s].p[1];
+        p[2] = outgoing[s].p[2];
+
+        for(int i=0; i< 3; i++){
+            point.p[i] = 0;
+            for(int j=0; j< 4; j++)
+                point.p[i] += transformation->mat[i][j] * p[j];
+        }
+
+        outgoing[s] = point;
+    }
+}
+
+Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints){
+
+    switch( b->type ){
+
+        case ANIMATION: {
+            printf("Animation\n");
+            Animation ani = (Animation)b->node;
+            long minv = inpoints->size();
+            long maxv = -1;
+
+            for(Branch desbranch : *(ani->subbranch) ) {
+                Model mod = recInterpret(desbranch, inpoints, outpoints);
+                minv = min(minv,mod->starti);
+                maxv = max(maxv,mod->endi);
+                unmkModel(mod);
+            }
+
+            applyAnimation(ani, outpoints, minv, maxv);
+
+            if( minv > maxv )
+                return mkModel(minv,maxv);
+            else
+                return mkModel(0,0);
+
+            break;
+        }
+
+        case TRANSFORMATION: {
+            printf("Transformation\n");
+            Transformation t = (Transformation)b->node;
+            long minv = inpoints->size();
+            long maxv = -1;
+
+            for(Branch desbranch : *(t->subbranch) ) {
+                Model mod = recInterpret(desbranch, inpoints, outpoints);
+                //printf("%ld  to %ld \n",mod->starti,mod->endi);
+                minv = min(minv,mod->starti);
+                maxv = max(maxv,mod->endi);
+                unmkModel(mod);
+            }
+
+            applyTransformation(t, outpoints, minv, maxv);
+            //printf("%ld  ack %ld \n",minv,maxv);
+
+            if( minv < maxv )
+                return mkModel(minv,maxv);
+            else
+                return mkModel(0,0);
+
+            break;
+        }
+
+        case MODEL: {
+            printf("Model\n");
+            Model mo = (Model)b->node;
+            printf(" %ld - %ld   \n", mo->starti, mo->endi);
+            for(long i = mo->starti; i < mo->endi; i++){
+                outpoints[i] = inpoints->at(i);
+            }
+            return mkModel(mo->starti,mo->endi);
+        }
+
+        default:
+            printf("sometype \n");
+            return mkModel(inpoints->size(),-1);
+    }
+}
+
+void branchInterpret(Branch b, vector<Point>* inpoints, Point* outpoints){
+    unmkModel(recInterpret(b, inpoints, outpoints));
+
+
 }

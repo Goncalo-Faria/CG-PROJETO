@@ -30,4 +30,6 @@ void assemblerDraw(Assembler reference);
 
 void assemblerBufferData(Assembler reference);
 
+void assemblerClear();
+
 #endif

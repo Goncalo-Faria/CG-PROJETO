@@ -47,4 +47,6 @@ Animation mkAnimation(float period, std::vector<Point> * controlpoints, Animatio
 void unmkAnimation(Animation ani);
 void assemblerAnimate( Assembler ass, float period, std::vector<Point> * controlpoints, AnimationType type );
 
+void branchInterpret(Branch b, std::vector<Point>* inpoints, Point * outpoints);
+
 #endif
