@@ -87,6 +87,28 @@ void assemblerTransformate( Assembler ass, float ** mat){
 
 }
 
+void applyTransformation( Transformation transformation, Point* outgoing, long start, long end){
+
+    Point point;
+    float p[4];
+
+    p[3] = 1;
+
+    for( long s = start; s< end; s++ ){
+        p[0] = outgoing[s].p[0];
+        p[1] = outgoing[s].p[1];
+        p[2] = outgoing[s].p[2];
+
+        for(int i=0; i< 3; i++){
+            point.p[i] = 0;
+            for(int j=0; j< 4; j++)
+                point.p[i] += transformation->mat[i][j] * p[j];
+        }
+
+        outgoing[s] = point;
+    }
+}
+
 /* Model */
 
 Model mkModel(long start, long end){
@@ -186,6 +208,11 @@ void assemblerAnimate( Assembler ass, float period, vector<Point> * controlpoint
     }
 }
 
+void applyAnimation( Animation animation, Point* outgoing, long start, long end){
+
+
+}
+
 /* Branch */
 
 void addDescendent( Animation ani, Branch descendent ){
@@ -242,39 +269,12 @@ void unmkBranch( Branch b ){
     free(b);
 }
 
-void applyAnimation( Animation animation, Point* outgoing, long start, long end){
-
-
-}
-
-void applyTransformation( Transformation transformation, Point* outgoing, long start, long end){
-
-    Point point;
-    float p[4];
-
-    p[3] = 1;
-
-    for( long s = start; s< end; s++ ){
-        p[0] = outgoing[s].p[0];
-        p[1] = outgoing[s].p[1];
-        p[2] = outgoing[s].p[2];
-
-        for(int i=0; i< 3; i++){
-            point.p[i] = 0;
-            for(int j=0; j< 4; j++)
-                point.p[i] += transformation->mat[i][j] * p[j];
-        }
-
-        outgoing[s] = point;
-    }
-}
-
 Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints){
 
     switch( b->type ){
 
         case ANIMATION: {
-            printf("Animation\n");
+            // printf("Animation\n");
             Animation ani = (Animation)b->node;
             long minv = inpoints->size();
             long maxv = -1;
@@ -297,21 +297,19 @@ Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints){
         }
 
         case TRANSFORMATION: {
-            printf("Transformation\n");
+            //printf("Transformation\n");
             Transformation t = (Transformation)b->node;
             long minv = inpoints->size();
             long maxv = -1;
 
             for(Branch desbranch : *(t->subbranch) ) {
                 Model mod = recInterpret(desbranch, inpoints, outpoints);
-                //printf("%ld  to %ld \n",mod->starti,mod->endi);
                 minv = min(minv,mod->starti);
                 maxv = max(maxv,mod->endi);
                 unmkModel(mod);
             }
 
             applyTransformation(t, outpoints, minv, maxv);
-            //printf("%ld  ack %ld \n",minv,maxv);
 
             if( minv < maxv )
                 return mkModel(minv,maxv);
@@ -322,23 +320,174 @@ Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints){
         }
 
         case MODEL: {
-            printf("Model\n");
+            //printf("Model\n");
             Model mo = (Model)b->node;
-            printf(" %ld - %ld   \n", mo->starti, mo->endi);
-            for(long i = mo->starti; i < mo->endi; i++){
+            //printf(" %ld - %ld   \n", mo->starti, mo->endi);
+            for(long i = mo->starti; i < mo->endi; i++)
                 outpoints[i] = inpoints->at(i);
-            }
+
             return mkModel(mo->starti,mo->endi);
         }
 
         default:
-            printf("sometype \n");
+            //printf("sometype \n");
             return mkModel(inpoints->size(),-1);
     }
 }
 
 void branchInterpret(Branch b, vector<Point>* inpoints, Point* outpoints){
     unmkModel(recInterpret(b, inpoints, outpoints));
+}
 
+void branchOptimizeTransf( Branch b ){
+    switch( b->type ){
+        case EMPTY: {
+            break;
+        }
+        case ANIMATION: {
+            Animation t = (Animation)b->node;
+            for(long i=0; i < t->subbranch->size(); i++) {
+
+                Branch tmpb = t->subbranch->at(i);
+
+                branchOptimizeTransf(tmpb);
+
+                if( tmpb->type == MODEL ){
+                    Model moo = (Model)tmpb->node;
+                    if(moo->endi == moo->starti){
+                        //printf("chop\n");
+                        /* eliminar este ramo*/
+                        Branch* hidbuff = t->subbranch->data();
+                        hidbuff[i] = hidbuff[ t->subbranch->size() - 1 ];
+                        t->subbranch->pop_back();
+                        unmkModel(moo);
+                        free(tmpb);
+                    }
+                }
+            }
+
+            if( t->subbranch->empty() ){
+                //printf("chop\n");
+                /*tranformações que não afetam ninguêm são eliminadas*/
+                unmkAnimation(t);
+                b->type = MODEL;
+                b->node = mkModel(0L,0L);
+            }
+
+
+            break;
+        }
+        case TRANSFORMATION: {
+            Transformation t = (Transformation)b->node;
+
+            for(long i=0; i < t->subbranch->size(); i++) {
+
+                Branch tmpb = t->subbranch->at(i);
+
+                branchOptimizeTransf(tmpb);
+
+                if( tmpb->type == MODEL ){
+                    Model moo = (Model)tmpb->node;
+                    if(moo->endi == moo->starti){
+                        //printf("chop\n");
+                        /* eliminar este ramo*/
+                        Branch* hidbuff = t->subbranch->data();
+                        hidbuff[i] = hidbuff[ t->subbranch->size() - 1 ];
+                        t->subbranch->pop_back();
+                        unmkModel(moo);
+                        free(tmpb);
+                    }
+                }
+            }
+
+            if( t->subbranch->size() == 1 && t->subbranch->at(0)->type == TRANSFORMATION ){
+                /* transformações seguidas são compostas*/
+                //printf("chop\n");
+                Transformation ut = (Transformation) t->subbranch->at(0)->node;
+
+                float** nmat = matmul(t->mat, ut->mat); /* a transformação torna-se a composição das duas transformações*/
+
+                freeMat(t->mat);/* apaga matrizes antigas*/
+                freeMat(ut->mat);/* apaga matrizes antigas*/
+
+                free(t->subbranch->at(0));/* apaga o ramo do filho*/
+
+                delete t->subbranch;/* apaga a lista de filhos*/
+
+
+                t->mat = nmat;/* a nova matriz é a composição*/
+                t->subbranch = ut->subbranch;/* netos tornam-se filhos*/
+                free(ut);/* apaga memória do filho*/
+
+            }else if( t->subbranch->empty() ){
+                //printf("chop\n");
+                /*tranformações que não afetam ninguêm são eliminadas*/
+                unmkTransformation(t);
+                b->type = MODEL;
+                b->node = mkModel(0L,0L);
+            }
+
+            break;
+        }
+        case MODEL: {
+            break;
+        }
+    }
+}
+
+void branchOptimizeModels( vector<Point> * points, Branch b){
+    switch( b->type ){
+        case EMPTY: { break; }
+
+        case ANIMATION: {
+            Animation t = (Animation)b->node;
+
+            for( Branch nb : *(t->subbranch) )
+                branchOptimizeModels(points, nb);
+
+            break;
+        }
+
+        case TRANSFORMATION: {
+            Transformation t = (Transformation)b->node;
+
+            bool allmodels = true;
+
+            for( Branch nb : *(t->subbranch) ) {
+                branchOptimizeModels(points, nb);
+                allmodels = allmodels && (nb->type == MODEL);
+            }
+
+            if( allmodels ){ /* every descendent is a model*/
+
+                long minv = points->size();
+                long maxv = -1;
+
+                for( long i =0; i < t->subbranch->size(); i++ ) { /* transforms the models and combines them*/
+                    Model model = (Model)(t->subbranch->at(i)->node);
+                    minv = min(minv,model->starti);
+                    maxv = max(maxv,model->endi);
+                    applyTransformation(t, points->data(), model->starti, model->endi);
+                    unmkBranch(t->subbranch->at(i));
+                }
+
+                delete t->subbranch;
+                freeMat(t->mat);
+                free(t);
+
+                b->node = mkModel(minv,maxv);
+                b->type = MODEL;/*agregates everything in a single model.*/
+            }
+
+            break;
+        }
+
+        case MODEL: { break; }
+    }
+}
+
+void branchOptimize(vector<Point> * points, Branch root){
+    branchOptimizeTransf(root);
+    branchOptimizeModels(points,root);
 
 }

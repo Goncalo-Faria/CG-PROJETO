@@ -37,8 +37,8 @@ Assembler mkAssembler(){
     ass->points = new vector< Point >();
     ass->buffer= -1;
 
-    ass->root.type = EMPTY;
-    ass->root.node = NULL;
+    ass->root.type = TRANSFORMATION;
+    ass->root.node = mkTransformation(identity());
     return ass;
 }
 
@@ -312,8 +312,6 @@ void assemblerInterpret(Assembler reference){
 void assemblerDraw(Assembler reference){
     assemblerInterpret(reference);
 
-    //assemb
-
     glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);
     glBufferData(
             GL_ARRAY_BUFFER,
@@ -325,9 +323,14 @@ void assemblerDraw(Assembler reference){
     glDrawArrays(GL_TRIANGLES, 0, reference->points->size());
 }
 
+void assemblerOptimize(Assembler reference){
+    branchOptimize(reference->points, &(reference->root) );
+    reference->points->shrink_to_fit();
+}
+
 void assemblerBufferData(Assembler reference){
 
-    //<<<< branchOptimize.
+    assemblerOptimize(reference);
 
     outbuffer = (Point*)malloc( sizeof(Point) * reference->points->size());
     //memcpy( outbuffer ,reference->points->data(), sizeof(Point) * reference->points->size() );
