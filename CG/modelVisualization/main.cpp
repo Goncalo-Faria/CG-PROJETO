@@ -3,9 +3,7 @@
 #else
     #include <GLUT/glut.h>
 #endif
-
-#include "../common/coordinateFrame.h"
-
+#include "assembler.h"
 #include <iostream>
 
 using namespace std;
@@ -14,7 +12,7 @@ GLfloat x = 0.0f;
 GLfloat y = 1.0f;
 GLfloat z = 0.0f;
 
-CoordinateFrame mainframe;
+Assembler mainframe;
 
 void changeSize(int w, int h) {
 	if(h == 0) h = 1;
@@ -30,7 +28,7 @@ void changeSize(int w, int h) {
 
 void init() {
 
-	frameBufferData(mainframe);
+	assemblerBufferData(mainframe);
 
 }
 
@@ -49,7 +47,7 @@ void renderScene() {
 
 	glColor3f(1.0,1.0,1.0);
 
-    frameDraw(mainframe);
+    assemblerDraw(mainframe);
 
 	glutSwapBuffers();
 }
@@ -106,7 +104,8 @@ int main(int argc, char ** argv) {
 		return 2;
 	}
 	
-	mainframe = parse(argv[1]);
+	mainframe = mkAssembler(argv[1]);
+
 	if (!mainframe) {
         cout << "File not found" << endl;
 		return 3;
@@ -114,7 +113,8 @@ int main(int argc, char ** argv) {
 
 	glut(argc, argv);
 
-	unmkCoordinateFrame(mainframe);
+	unmkAssembler(mainframe);
+    assemblerClear();
 
 	return 1;
 }

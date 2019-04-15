@@ -1,0 +1,17 @@
+<scene>
+    <group>
+	    <models>
+            <model file='../xml/teapot.xml' />
+        </models>
+        <group>
+            <translate X='2' Y='0' Z='2' />
+            <scale stretchX='0.22' stretchY='0.22' stretchZ='0.22' />
+            <models>
+                <model file='../xml/teapot.xml' />
+            </models>
+        </group>
+    </group>
+</scene>
+
+
+

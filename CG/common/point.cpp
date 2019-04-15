@@ -1,10 +1,7 @@
 #include "point.h"
 #include <stdlib.h>
 
-Point* mkPoint(double x, double y, double z);
-void unmkPoint(Point* p);
-
-Point* mkPoint(double x, double y, double z){
+Point* mkPoint(float x, float y, float z){
 	Point* m = (Point*) malloc( sizeof(struct point) );
 	m->p[0] = x;
 	m->p[1] = y;
