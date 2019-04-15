@@ -41,14 +41,6 @@ CoordinateFrame mkCoordinateFrameRx(float angle);
 CoordinateFrame mkCoordinateFrameRy(float angle);
 CoordinateFrame mkCoordinateFrameRz(float angle);
 
-void frameAggregate(CoordinateFrame a, CoordinateFrame b);
-
-void plataform(CoordinateFrame reference, int points, float bottomradius, float topradius, int downface, int upface);
-void plane(CoordinateFrame reference);
-
-CoordinateFrame parseGroups(XMLNode * group, CoordinateFrame state);
-void parseModel(const char * filename, CoordinateFrame state);
-vector<string> split(string strToSplit, char delimeter);
 
 /* Implementation */
 
@@ -101,31 +93,6 @@ CoordinateFrame mkCoordinateFrame(CoordinateFrame mold){
     m->points = NULL;
 
 	return m;
-}
-
-CoordinateFrame mkCoordinateFrame(const char * filename) {
-	XMLDocument xml_doc;
-	//cout << "parse" << endl;
-	XMLError eResult = 
-		xml_doc.LoadFile(filename);
-
-	if (eResult != XML_SUCCESS) {
-        //cout << "parse" << endl;
-        return NULL;
-    }
-
-	XMLNode* root = xml_doc.FirstChildElement("scene");
-
-	if (root == nullptr)
-		return NULL;
-	
-	CoordinateFrame frame = mkCoordinateFrame();
-
-	frame = parseGroups(root, frame);
-
-	xml_doc.Clear();
-
-	return frame;
 }
 
 void unmkCoordinateFrame(CoordinateFrame m){
@@ -218,100 +185,4 @@ void frameTriangle(CoordinateFrame m, float angle, float difs){
 	framePoint(m, cos(angle), 0,sin(angle));
 	framePoint(m, 0, 0, 0);
 	framePoint(m, cos(angle+difs), 0,sin(angle+difs));
-}
-
-void frameDraw(CoordinateFrame reference){
-	glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);
-	glVertexPointer(3,GL_FLOAT,0,0);
-	glDrawArrays(GL_TRIANGLES, 0, reference->points->size());
-}
-
-void frameBufferData(CoordinateFrame reference){
-	
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glGenBuffers(1, &(reference->buffer) );
-	glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);
-	glBufferData(
-		GL_ARRAY_BUFFER,
-		reference->points->size() * sizeof(Point),
-		&( (*(reference->points))[0] ),
-		GL_STATIC_DRAW
-	);
-}
-
-CoordinateFrame parseGroups(XMLNode * group, CoordinateFrame state){
-
-	for(XMLNode * g = group->FirstChild();
-		g != nullptr;
-		g = g->NextSibling()
-		)
-	{
-		const char * name = g->Value();
-		if(!strcmp(name,"models")){
-			XMLElement * e = g->FirstChildElement("model");
-	
-			while(e != nullptr) {
-				parseModel(e->Attribute("file"),state);
-				e = e->NextSiblingElement("model");
-			}
-		}else if(!strcmp(name,"translate")){
-
-			XMLElement *e = (XMLElement*) g;
-			frameTranslate(	state,
-					 	   	e->FloatAttribute("X"),
-							e->FloatAttribute("Y"),
-							e->FloatAttribute("Z")
-							);
-		}else if(!strcmp(name,"rotate")){
-			
-			XMLElement *e = (XMLElement*) g;
-			frameRotate(state,
-						e->FloatAttribute("angle"),
-						e->FloatAttribute("axisX"),
-						e->FloatAttribute("axisY"),
-						e->FloatAttribute("axisZ")
-						);
-		}else if(!strcmp(name,"scale")){
-		
-			XMLElement *e = (XMLElement*) g;
-			frameScale(state,
-							   e->FloatAttribute("stretchX", 1.0),
-							   e->FloatAttribute("stretchY", 1.0),
-							   e->FloatAttribute("stretchZ", 1.0)
-			);
-		
-		}else if(!strcmp(name,"group")){
-			unmkCoordinateFrame(parseGroups(g, mkCoordinateFrame(state)));
-		}
-	
-	}
-
-	return state;
-}
-
-vector<string> split(string strToSplit, char delimeter)
-{
-	stringstream ss(strToSplit);
-	string item;
-	vector<string> splittedStrings;
-
-	while (getline(ss, item, delimeter)){
-		splittedStrings.push_back(item);
-	}
-
-	return splittedStrings;
-}
-
-void parseModel(const char * filename, CoordinateFrame state) {
-	ifstream file(filename);
-	if (file.is_open()) {
-		string line;
-		while (getline(file, line)) {
-			if (line.find("point") != string::npos) {
-				vector<string> s = split(line, '"');
-				framePoint(state, stod(s.at(1)), stod(s.at(3)), stod(s.at(5)));
-			}
-		}
-		file.close();
-	}
 }
