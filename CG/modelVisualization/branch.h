@@ -48,6 +48,7 @@ void unmkAnimation(Animation ani);
 void assemblerAnimate( Assembler ass, int period, std::vector<Point> * controlpoints, AnimationType type );
 
 void branchInterpret(Branch b, std::vector<Point>* inpoints, Point * outpoints, int time);
+
 void branchOptimize(std::vector<Point> * points , Branch b);
 
 #endif

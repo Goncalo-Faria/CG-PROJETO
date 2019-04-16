@@ -185,7 +185,6 @@ long assemblerNumberOfPoints(Assembler ass){
 }
 
 void assemblerRotate(Assembler ass, float angle, float vx, float vy, float vz){
-
     assemblerTransformate(ass, matRotate(angle,vx,vy,vz));
 }
 
@@ -345,9 +344,7 @@ Assembler parseGroups(XMLNode * group, Assembler state)
 }
 
 void assemblerInterpret(Assembler reference, int time){
-
     branchInterpret(&(reference->root), reference->points ,outbuffer,time);
-
 }
 
 //glMapBuffer(	GLenum target, acess)
@@ -388,5 +385,6 @@ void assemblerBufferData(Assembler reference){
             GL_DYNAMIC_DRAW
     );
 }
+
 
 

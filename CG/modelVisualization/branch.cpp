@@ -15,6 +15,7 @@
 #include <string>
 #include <cmath>
 
+
 using namespace std;
 
 #define max(A,B) (A > B) ? A : B;
@@ -99,7 +100,7 @@ void applyTransformation( Transformation transformation, Point* outgoing, long s
         p[0] = outgoing[s].p[0];
         p[1] = outgoing[s].p[1];
         p[2] = outgoing[s].p[2];
-
+      
         float*tmp = vecmul( transformation->mat ,p);
 
         point.p[0] = tmp[0] ;
@@ -166,6 +167,7 @@ void assemblerModelate( Assembler ass, float x, float y, float z){
 /* Animation */
 
 Animation mkAnimation(int period, vector<Point> * controlpoints, AnimationType type){
+
     Animation ani = (Animation)malloc( sizeof(struct animation) );
     ani->type = type;
     ani->period = period;
@@ -184,7 +186,9 @@ void unmkAnimation(Animation ani){
     free(ani);
 }
 
+
 void assemblerAnimate( Assembler ass, int period, vector<Point> * controlpoints, AnimationType type ){
+
     switch( view(ass)->type ){
         case EMPTY: {
             view(ass)->node = mkAnimation(period, controlpoints, type);
@@ -377,17 +381,20 @@ Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints, int time
     switch( b->type ){
 
         case ANIMATION: {
-            //printf("Animation\n");
+          
             Animation ani = (Animation)b->node;
             long minv = inpoints->size();
             long maxv = -1;
 
             for(Branch desbranch : *(ani->subbranch) ) {
+              
                 Model mod = recInterpret(desbranch, inpoints, outpoints,time);
+              
                 minv = min(minv,mod->starti);
                 maxv = max(maxv,mod->endi);
                 unmkModel(mod);
             }
+          
             applyAnimation(ani, outpoints, minv, maxv, time);
 
             if( minv < maxv )
@@ -405,7 +412,9 @@ Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints, int time
             long maxv = -1;
 
             for(Branch desbranch : *(t->subbranch) ) {
+
                 Model mod = recInterpret(desbranch, inpoints, outpoints,time);
+              
                 minv = min(minv,mod->starti);
                 maxv = max(maxv,mod->endi);
                 unmkModel(mod);
@@ -427,6 +436,7 @@ Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints, int time
             //printf(" %ld - %ld   \n", mo->starti, mo->endi);
             for(long i = mo->starti; i < mo->endi; i++)
                 outpoints[i] = inpoints->at(i);
+          
             return mkModel(mo->starti,mo->endi);
         }
 

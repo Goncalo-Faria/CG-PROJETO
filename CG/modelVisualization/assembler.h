@@ -1,11 +1,13 @@
 #ifndef _assembler_h
 #define _assembler_h
 
+
 typedef struct assembler *Assembler;
 
 #include "branch.h"
 #include "../common/point.h"
 #include <vector>
+
 
 Assembler mkAssembler(const char * filename);
 
@@ -34,6 +36,5 @@ void assemblerRotationAnimation(Assembler ass, int period, float vx, float vy, f
 void assemblerDraw(Assembler reference, int time);
 
 void assemblerBufferData(Assembler reference);
-
 
 #endif

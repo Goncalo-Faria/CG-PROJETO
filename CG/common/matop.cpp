@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 
+
 float** identity(){
     float**t = (float**)malloc(sizeof(float*)*4);
     for(int i = 0; i< 4; i++) {
@@ -167,6 +168,7 @@ float * vecmul( float mat[4][4] ,float * vec, int n){
     return r;
 }
 
+
 float** matmul(float a[4][4], float** b){
     float ** result = zeros();
 
@@ -177,6 +179,7 @@ float** matmul(float a[4][4], float** b){
 
     return result;
 }
+
 
 float** matRotate(float angle, float vx, float vy, float vz){
     float l = sqrt(vx*vx + vy*vy + vz*vz);
