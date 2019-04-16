@@ -5,12 +5,13 @@
 #endif
 #include "assembler.h"
 #include <iostream>
+#include <cmath>
 
 using namespace std;
 
-GLfloat x = 0.0f;
-GLfloat y = 1.0f;
-GLfloat z = 0.0f;
+float camX = 0, camY, camZ = 5;
+int startX, startY, tracking = 0;
+int alpha = 0, beta = 0, r = 5;
 
 Assembler mainframe;
 
@@ -36,14 +37,9 @@ void renderScene() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glLoadIdentity();
-	gluLookAt(	12.0,12.0,12.0,
-				0.0 ,0.0 ,0.0,
-				0.0 ,1.0 ,0.0
-	);
-
-	glRotatef(x, 1.0, 0.0, 0.0);
-	glRotatef(y, 0.0, 1.0, 0.0);
-	glRotatef(z, 0.0, 0.0, 1.0);
+    gluLookAt(camX, camY, camZ,
+              0.0,0.0,0.0,
+              0.0f,1.0f,0.0f);
 
 	glColor3f(0.6,0.0,0.8);
 
@@ -54,31 +50,58 @@ void renderScene() {
 	glutSwapBuffers();
 }
 
-void keyboardCallback(unsigned char key_code, int xaaa, int yaaa) {
-	switch (key_code) {
-        case 'w':
-            x += 10.0f;
-            break;
-        case 's':
-            x -= 10.0f;
-            break;
-        case 'a':
-            y -= 10.0f;
-            break;
-        case 'd':
-            y += 10.0f;
-            break;
-        case 'e':
-            z += 10.0f;
-            break;
-        case 'r':
-            z -= 10.0f;
-            break;
-        default:
-            break;
-	}
+void processMouseButtons(int button, int state, int xx, int yy) {
+    if (state == GLUT_DOWN)  {
+        startX = xx;
+        startY = yy;
+        if (button == GLUT_LEFT_BUTTON)
+            tracking = 1;
+        else if (button == GLUT_RIGHT_BUTTON)
+            tracking = 2;
+        else
+            tracking = 0;
+    }
+    else if (state == GLUT_UP) {
+        if (tracking == 1) {
+            alpha += (xx - startX);
+            beta += (yy - startY);
+        }
+        else if (tracking == 2) {
+            r -= yy - startY;
+            if (r < 3)
+                r = 3.0;
+        }
+        tracking = 0;
+    }
+}
 
-	glutPostRedisplay();
+void processMouseMotion(int xx, int yy) {
+    int deltaX, deltaY;
+    int alphaAux, betaAux;
+    int rAux;
+    if (!tracking)
+        return;
+    deltaX = xx - startX;
+    deltaY = yy - startY;
+    if (tracking == 1) {
+        alphaAux = alpha + deltaX;
+        betaAux = beta + deltaY;
+        if (betaAux > 85.0)
+            betaAux = 85.0;
+        else if (betaAux < -85.0)
+            betaAux = -85.0;
+        rAux = r;
+    }
+    else if (tracking == 2) {
+        alphaAux = alpha;
+        betaAux = beta;
+        rAux = r - deltaY;
+        if (rAux < 3)
+            rAux = 3;
+    }
+    camX = rAux * sin(alphaAux * 3.14 / 180.0) * cos(betaAux * 3.14 / 180.0);
+    camZ = rAux * cos(alphaAux * 3.14 / 180.0) * cos(betaAux * 3.14 / 180.0);
+    camY = rAux *							     sin(betaAux * 3.14 / 180.0);
 }
 
 void glut(int argc, char **argv) {
@@ -90,7 +113,9 @@ void glut(int argc, char **argv) {
 
     glutDisplayFunc(renderScene);
     glutReshapeFunc(changeSize);
-	glutKeyboardFunc(keyboardCallback);
+
+    glutMouseFunc(processMouseButtons);
+    glutMotionFunc(processMouseMotion);
 
     glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);

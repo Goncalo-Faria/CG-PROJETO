@@ -209,11 +209,9 @@ float ** matTranslate(float x, float y, float z){
 float** matScale(float xaxis, float yaxis, float zaxis){
     float** t = identity();
 
-    float l = sqrt(xaxis*xaxis + yaxis*yaxis + zaxis*zaxis);
-
-    t[0][0] = xaxis/l;
-    t[1][1] = yaxis/l;
-    t[2][2] = zaxis/l;
+    t[0][0] = xaxis;
+    t[1][1] = yaxis;
+    t[2][2] = zaxis;
 
     return t;
 }

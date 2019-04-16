@@ -247,7 +247,6 @@ void getCatmullRomPoint(float t,Point p0, Point p1, Point p2, Point p3, float *p
             pos[i] += tt[j] * a[i][j];
     }
 
-
     // Compute deriv = T' * A
     float ttt[4] = { 3*t*t, 2*t , 1, 0 };
     for (int i = 0; i < 3; i++) {
@@ -282,6 +281,7 @@ void applyTranslationAnimation( int period, vector<Point> * axis, Point* outgoin
     float deriv[3];
     float gt = (float)(elapsed_time%period) / (float)period;
 
+    printf(" ## %ld \n", axis->size());
     Point norm = axis->at( axis->size()-1 );
 
     axis->pop_back();
@@ -291,7 +291,7 @@ void applyTranslationAnimation( int period, vector<Point> * axis, Point* outgoin
     float **p1 = matTranslate(pos[0], pos[1],pos[2]);
     float **p2 = upsidemat(deriv,norm.p);
 
-    Transformation t = mkTransformation(matmul(p2,p1));
+    Transformation t = mkTransformation(matmul(p1,p2));
 
     applyTransformation(t,outgoing,start,end);
 
