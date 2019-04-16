@@ -281,7 +281,7 @@ void applyTranslationAnimation( int period, vector<Point> * axis, Point* outgoin
     float deriv[3];
     float gt = (float)(elapsed_time%period) / (float)period;
 
-    printf(" ## %ld \n", axis->size());
+    //printf(" ## %ld \n", axis->size());
     Point norm = axis->at( axis->size()-1 );
 
     axis->pop_back();
@@ -378,7 +378,7 @@ Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints, int time
     switch( b->type ){
 
         case ANIMATION: {
-            printf("Animation\n");
+            //printf("Animation\n");
             Animation ani = (Animation)b->node;
             long minv = inpoints->size();
             long maxv = -1;
@@ -400,7 +400,7 @@ Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints, int time
         }
 
         case TRANSFORMATION: {
-            printf("Transformation\n");
+            //printf("Transformation\n");
             Transformation t = (Transformation)b->node;
             long minv = inpoints->size();
             long maxv = -1;
@@ -423,12 +423,11 @@ Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints, int time
         }
 
         case MODEL: {
-            printf("Model\n");
+            //printf("Model\n");
             Model mo = (Model)b->node;
-            printf(" %ld - %ld   \n", mo->starti, mo->endi);
+            //printf(" %ld - %ld   \n", mo->starti, mo->endi);
             for(long i = mo->starti; i < mo->endi; i++)
                 outpoints[i] = inpoints->at(i);
-
             return mkModel(mo->starti,mo->endi);
         }
 

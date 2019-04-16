@@ -350,22 +350,22 @@ void assemblerInterpret(Assembler reference, int time){
 
 }
 
+//glMapBuffer(	GLenum target, acess)
+
 void assemblerDraw(Assembler reference, int time){
-    assemblerInterpret(reference, time);
+
 
     glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);
-    glBufferData(
-            GL_ARRAY_BUFFER,
-            reference->points->size() * sizeof(Point),
-            outbuffer,
-            GL_STREAM_DRAW
-    );
+
+    outbuffer = (Point*)glMapBuffer(GL_ARRAY_BUFFER,GL_READ_WRITE);
+
+    assemblerInterpret(reference, time);
+
+    glUnmapBuffer(GL_ARRAY_BUFFER);
 
     glVertexPointer(3,GL_FLOAT,0,0);
     glDrawArrays(GL_TRIANGLES, 0, reference->points->size());
 
-
-    //glutSwapBuffers();
     glutPostRedisplay();
 }
 
@@ -378,7 +378,7 @@ void assemblerBufferData(Assembler reference){
 
     assemblerOptimize(reference);
 
-    outbuffer = (Point*)malloc( sizeof(Point) * reference->points->size());
+    //outbuffer = (Point*)malloc( sizeof(Point) * reference->points->size());
     //memcpy( outbuffer ,reference->points->data(), sizeof(Point) * reference->points->size() );
 
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -387,12 +387,9 @@ void assemblerBufferData(Assembler reference){
     glBufferData(
             GL_ARRAY_BUFFER,
             reference->points->size() * sizeof(Point),
-            outbuffer,
-            GL_STREAM_DRAW
+            &(reference->points->at(0)),
+            GL_DYNAMIC_DRAW
     );
 }
 
-void assemblerClear(){
-    free(outbuffer);
-}
 

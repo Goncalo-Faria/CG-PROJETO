@@ -35,6 +35,5 @@ void assemblerDraw(Assembler reference, int time);
 
 void assemblerBufferData(Assembler reference);
 
-void assemblerClear();
 
 #endif
