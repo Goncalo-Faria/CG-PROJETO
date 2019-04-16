@@ -43,11 +43,12 @@ Model mkModel(long start, long end);
 void unmkModel(Model model);
 void assemblerModelate( Assembler ass, float x, float y, float z);
 
-Animation mkAnimation(float period, std::vector<Point> * controlpoints, AnimationType type);
+Animation mkAnimation(int period, std::vector<Point> * controlpoints, AnimationType type);
 void unmkAnimation(Animation ani);
-void assemblerAnimate( Assembler ass, float period, std::vector<Point> * controlpoints, AnimationType type );
+void assemblerAnimate( Assembler ass, int period, std::vector<Point> * controlpoints, AnimationType type );
 
-void branchInterpret(Branch b, std::vector<Point>* inpoints, Point * outpoints);
+void branchInterpret(Branch b, std::vector<Point>* inpoints, Point * outpoints, int time);
+
 void branchOptimize(std::vector<Point> * points , Branch b);
 
 #endif

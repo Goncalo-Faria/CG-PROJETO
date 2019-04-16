@@ -1,5 +1,6 @@
 #include "point.h"
 #include <stdlib.h>
+#include <cmath>
 
 Point* mkPoint(float x, float y, float z){
 	Point* m = (Point*) malloc( sizeof(struct point) );
