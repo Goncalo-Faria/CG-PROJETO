@@ -30,7 +30,6 @@ void changeSize(int w, int h) {
 void init() {
 
 	assemblerBufferData(mainframe);
-
 }
 
 void renderScene() {

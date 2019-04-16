@@ -378,9 +378,6 @@ void assemblerBufferData(Assembler reference){
 
     assemblerOptimize(reference);
 
-    //outbuffer = (Point*)malloc( sizeof(Point) * reference->points->size());
-    //memcpy( outbuffer ,reference->points->data(), sizeof(Point) * reference->points->size() );
-
     glEnableClientState(GL_VERTEX_ARRAY);
     glGenBuffers(1, &(reference->buffer) );
     glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);

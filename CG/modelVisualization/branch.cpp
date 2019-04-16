@@ -222,7 +222,6 @@ void applyRotationAnimation( int period, Point axis, Point* outgoing, long start
 
 }
 
-
 void getCatmullRomPoint(float t,Point p0, Point p1, Point p2, Point p3, float *pos, float *deriv) {
     // catmull-rom matrix
     float m[4][4] = {	{-0.5f,  1.5f, -1.5f,  0.5f},
