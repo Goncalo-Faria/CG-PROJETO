@@ -45,7 +45,7 @@ void renderScene() {
 	glRotatef(y, 0.0, 1.0, 0.0);
 	glRotatef(z, 0.0, 0.0, 1.0);
 
-	glColor3f(1.0,1.0,1.0);
+	glColor3f(0.6,0.0,0.8);
 
 	int time = glutGet(GLUT_ELAPSED_TIME);
 

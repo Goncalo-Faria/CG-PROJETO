@@ -13,6 +13,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <cmath>
 
 using namespace std;
 
@@ -99,13 +100,14 @@ void applyTransformation( Transformation transformation, Point* outgoing, long s
         p[1] = outgoing[s].p[1];
         p[2] = outgoing[s].p[2];
 
-        for(int i=0; i< 3; i++){
-            point.p[i] = 0;
-            for(int j=0; j< 4; j++)
-                point.p[i] += transformation->mat[i][j] * p[j];
-        }
+        float*tmp = vecmul( transformation->mat ,p);
+
+        point.p[0] = tmp[0] ;
+        point.p[1] = tmp[1];
+        point.p[2] = tmp[2];
 
         outgoing[s] = point;
+        free(tmp);
     }
 }
 
@@ -220,7 +222,85 @@ void applyRotationAnimation( int period, Point axis, Point* outgoing, long start
 
 }
 
+
+void getCatmullRomPoint(float t,Point p0, Point p1, Point p2, Point p3, float *pos, float *deriv) {
+    // catmull-rom matrix
+    float m[4][4] = {	{-0.5f,  1.5f, -1.5f,  0.5f},
+                         { 1.0f, -2.5f,  2.0f, -0.5f},
+                         {-0.5f,  0.0f,  0.5f,  0.0f},
+                         { 0.0f,  1.0f,  0.0f,  0.0f}};
+    // Compute A = M * P
+    float * a[3];
+    float x[4] = { p0.p[0],p1.p[0],p2.p[0],p3.p[0] };
+    float y[4] = { p0.p[1],p1.p[1],p2.p[1],p3.p[1] };
+    float z[4] = { p0.p[2],p1.p[2],p2.p[2],p3.p[2] };
+
+    a[0] = vecmul(m, x, 4);
+    a[1] = vecmul(m, y, 4);
+    a[2] = vecmul(m, z, 4);
+
+    // Compute pos = T * A
+    float tt[4] = { t*t*t, t*t, t, 1 };
+    for (int i = 0; i < 3; i++) {
+        pos[i]=0;
+        for(int j=0; j<4; j++)
+            pos[i] += tt[j] * a[i][j];
+    }
+
+
+    // Compute deriv = T' * A
+    float ttt[4] = { 3*t*t, 2*t , 1, 0 };
+    for (int i = 0; i < 3; i++) {
+        deriv[i]=0;
+        for(int j=0; j<4; j++)
+            deriv[i] += ttt[j] * a[i][j];
+
+    }
+
+    free(a[0]);
+    free(a[1]);
+    free(a[2]);
+}
+
+void getGlobalCatmullRomPoint(float gt, float *pos, float *deriv, vector<Point> * axis) {
+    long count = axis->size();
+    float t = gt * count; // this is the real global t
+    int index = floor(t);  // which segment
+    t = t - index; // where within  the segment
+    // indices store the points
+    int indices[4];
+    indices[0] = (index + count-1)%count;
+    indices[1] = (indices[0]+1)%count;
+    indices[2] = (indices[1]+1)%count;
+    indices[3] = (indices[2]+1)%count;
+
+    getCatmullRomPoint(t, axis->at(indices[0]), axis->at(indices[1]), axis->at(indices[2]), axis->at(indices[3]), pos, deriv);
+}
+
 void applyTranslationAnimation( int period, vector<Point> * axis, Point* outgoing, long start, long end, int elapsed_time ){
+    float pos[3];
+    float deriv[3];
+    float gt = (float)(elapsed_time%period) / (float)period;
+
+    Point norm = axis->at( axis->size()-1 );
+
+    axis->pop_back();
+
+    getGlobalCatmullRomPoint( gt, pos, deriv, axis);
+
+    float **p1 = matTranslate(pos[0], pos[1],pos[2]);
+    float **p2 = upsidemat(deriv,norm.p);
+
+    Transformation t = mkTransformation(matmul(p2,p1));
+
+    applyTransformation(t,outgoing,start,end);
+
+    freeMat(p1);
+    freeMat(p2);
+
+    unmkTransformation(t);
+
+    axis->emplace_back(norm);
 
 }
 
@@ -298,7 +378,7 @@ Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints, int time
     switch( b->type ){
 
         case ANIMATION: {
-            // printf("Animation\n");
+            printf("Animation\n");
             Animation ani = (Animation)b->node;
             long minv = inpoints->size();
             long maxv = -1;
@@ -309,10 +389,9 @@ Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints, int time
                 maxv = max(maxv,mod->endi);
                 unmkModel(mod);
             }
-            printf("hey\n");
             applyAnimation(ani, outpoints, minv, maxv, time);
 
-            if( minv > maxv )
+            if( minv < maxv )
                 return mkModel(minv,maxv);
             else
                 return mkModel(0,0);
@@ -321,7 +400,7 @@ Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints, int time
         }
 
         case TRANSFORMATION: {
-            //printf("Transformation\n");
+            printf("Transformation\n");
             Transformation t = (Transformation)b->node;
             long minv = inpoints->size();
             long maxv = -1;
@@ -344,9 +423,9 @@ Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints, int time
         }
 
         case MODEL: {
-            //printf("Model\n");
+            printf("Model\n");
             Model mo = (Model)b->node;
-            //printf(" %ld - %ld   \n", mo->starti, mo->endi);
+            printf(" %ld - %ld   \n", mo->starti, mo->endi);
             for(long i = mo->starti; i < mo->endi; i++)
                 outpoints[i] = inpoints->at(i);
 

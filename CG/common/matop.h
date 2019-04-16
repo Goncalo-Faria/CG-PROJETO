@@ -19,5 +19,14 @@ void matAssign(float r[4][4], float value[4][4]);
 float bernstein(int i, int n, float t);
 
 float** matRotate(float angle, float vx, float vy, float vz);
+float ** matTranslate(float x, float y, float z);
+float** matScale(float xaxis, float yaxis, float zaxis);
+
+float * vecmul(float**mat, float* vec);
+float * vecmul( float mat[4][4] ,float * vec, int n);
+
+float* crossVecProd(float *a, float *b);
+
+float ** upsidemat(float*deriv , float*norm);
 
 #endif

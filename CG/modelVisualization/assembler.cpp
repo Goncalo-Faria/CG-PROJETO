@@ -190,23 +190,13 @@ void assemblerRotate(Assembler ass, float angle, float vx, float vy, float vz){
 }
 
 void assemblerTranslate(Assembler ass, float x, float y, float z){
-    float** t = identity();
-	
-	t[0][3] = x;
-	t[1][3] = y;
-	t[2][3] = z;
 
-	assemblerTransformate(ass,t);
+	assemblerTransformate(ass,matTranslate(x,y,z));
 }
 
 void assemblerScale(Assembler ass, float xaxis, float yaxis, float zaxis){
-    float** t = identity();
-
-	t[0][0] = xaxis;
-	t[1][1] = yaxis;
-	t[2][2] = zaxis;
-
-    assemblerTransformate(ass,t);
+    //printf("%f %f %f \n",xaxis,yaxis,zaxis);
+    assemblerTransformate(ass, matScale(xaxis,yaxis,zaxis));
 }
 
 void assemblerRotationAnimation(Assembler ass, int period, float vx, float vy, float vz){
@@ -225,6 +215,14 @@ void assemblerRotationAnimation(Assembler ass, int period, float vx, float vy, f
 }
 
 void assemblerTranslationAnimation(Assembler ass, int period, vector<Point> * v ){
+
+    Point norm;
+
+    norm.p[0]=0;
+    norm.p[1]=1;
+    norm.p[2]=0;
+
+    v->emplace_back(norm);
 
     assemblerAnimate(ass, period, v, CURVED_TRANSLATION );
 
@@ -360,10 +358,14 @@ void assemblerDraw(Assembler reference, int time){
             GL_ARRAY_BUFFER,
             reference->points->size() * sizeof(Point),
             outbuffer,
-            GL_DYNAMIC_DRAW
+            GL_STREAM_DRAW
     );
+
     glVertexPointer(3,GL_FLOAT,0,0);
     glDrawArrays(GL_TRIANGLES, 0, reference->points->size());
+
+
+    //glutSwapBuffers();
     glutPostRedisplay();
 }
 
@@ -386,9 +388,8 @@ void assemblerBufferData(Assembler reference){
             GL_ARRAY_BUFFER,
             reference->points->size() * sizeof(Point),
             outbuffer,
-            GL_DYNAMIC_DRAW
+            GL_STREAM_DRAW
     );
-    // &((*(reference->points))[0])
 }
 
 void assemblerClear(){
