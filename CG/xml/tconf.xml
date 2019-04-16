@@ -1,11 +1,12 @@
 <scene>
     <group>
-        <translate period='10' >
-            <point X='2' Y='0' Z='2'/>
-            <point X='2' Y='1' Z='1'/>
+        <translate period='2000' >
+            <point X='4' Y='6' Z='4'/>
+            <point X='8' Y='12' Z='8'/>
+            <point X='12' Y='10' Z='10'/>
+            <point X='2' Y='8' Z='2'/>
         </translate>
-        <translate X='2' Y='0' Z='2' />
-        <rotate period='1200' axisX='0' axisY='0' axisZ='1' />
+        <rotate period='500' axisX='1' axisY='0' axisZ='0' />
         <models>
             <model file='../xml/teapot.xml' />
         </models>
