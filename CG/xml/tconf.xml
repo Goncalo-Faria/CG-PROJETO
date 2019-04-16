@@ -1,15 +1,14 @@
 <scene>
     <group>
-	    <models>
+        <translate period='10' >
+            <point X='2' Y='0' Z='2'/>
+            <point X='2' Y='1' Z='1'/>
+        </translate>
+        <translate X='2' Y='0' Z='2' />
+        <rotate period='1200' axisX='0' axisY='0' axisZ='1' />
+        <models>
             <model file='../xml/teapot.xml' />
         </models>
-        <group>
-            <translate X='2' Y='0' Z='2' />
-            <scale stretchX='0.22' stretchY='0.22' stretchZ='0.22' />
-            <models>
-                <model file='../xml/teapot.xml' />
-            </models>
-        </group>
     </group>
 </scene>
 

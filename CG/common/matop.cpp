@@ -93,6 +93,22 @@ float** matmul(float a[4][4], float** b){
     return result;
 }
 
+float** matRotate(float angle, float vx, float vy, float vz){
+    float rx = vx*angle;
+    float ry = vy*angle;
+    float rz = vz*angle;
+
+    float** mrx = matRx(rx);
+    float** mry = matRy(ry);
+    float** mrz = matRz(rz);
+
+    float** mr1 = matmul(mrx,mry);
+    float** mr2 = matmul(mr1,mrz);
+    freeMat(mr1);
+
+    return mr2;
+}
+
 void matAssign(float**r, float**value){
 
     for( int i = 0; i<4; i++ )

@@ -55,7 +55,6 @@ Assembler mkAssembler( Assembler origin ){
             origin->cur->node = mkTransformation(identity());
             origin->cur->type = TRANSFORMATION;
             addDescendent((Transformation)origin->cur->node, bn);
-
         }
 
         case ANIMATION: {
@@ -186,19 +185,8 @@ long assemblerNumberOfPoints(Assembler ass){
 }
 
 void assemblerRotate(Assembler ass, float angle, float vx, float vy, float vz){
-    float rx = vx*angle;
-	float ry = vy*angle;
-	float rz = vz*angle;
 
-	float** mrx = matRx(rx);
-    float** mry = matRy(ry);
-    float** mrz = matRz(rz);
-
-    float** mr1 = matmul(mrx,mry);
-    float** mr2 = matmul(mr1,mrz);
-    freeMat(mr1);
-
-    assemblerTransformate(ass,mr2);
+    assemblerTransformate(ass, matRotate(angle,vx,vy,vz));
 }
 
 void assemblerTranslate(Assembler ass, float x, float y, float z){
@@ -219,6 +207,27 @@ void assemblerScale(Assembler ass, float xaxis, float yaxis, float zaxis){
 	t[2][2] = zaxis;
 
     assemblerTransformate(ass,t);
+}
+
+void assemblerRotationAnimation(Assembler ass, int period, float vx, float vy, float vz){
+
+    auto l = new vector<Point>();
+
+    Point point;
+
+    point.p[0] = vx;
+    point.p[1] = vy;
+    point.p[2] = vz;
+
+    l->emplace_back(point);
+
+    assemblerAnimate(ass, period, l, ROTATION );
+}
+
+void assemblerTranslationAnimation(Assembler ass, int period, vector<Point> * v ){
+
+    assemblerAnimate(ass, period, v, CURVED_TRANSLATION );
+
 }
 
 vector<string> split(string strToSplit, char delimeter)
@@ -271,20 +280,54 @@ Assembler parseGroups(XMLNode * group, Assembler state)
 		}else if(!strcmp(name,"translate")){
 
 			XMLElement *e = (XMLElement*) g;
-			assemblerTranslate(	state,
-					 	e->FloatAttribute("X"),
-						e->FloatAttribute("Y"),
-						e->FloatAttribute("Z")
-						);
+
+            if(e->IntAttribute("period",-1.0) < 0.0 ){
+                assemblerTranslate(	state,
+                        e->FloatAttribute("X"),
+                        e->FloatAttribute("Y"),
+                        e->FloatAttribute("Z")
+                );
+            }else{
+                int period = e->IntAttribute("period");
+                XMLElement * c = g->FirstChildElement("point");
+                vector<Point> * vOfPoints = new vector<Point>();
+
+                Point tmp;
+                while(c != nullptr) {
+
+                    tmp.p[0] = c->FloatAttribute("X");
+                    tmp.p[1] = c->FloatAttribute("Y");
+                    tmp.p[2] = c->FloatAttribute("Z");
+
+                    vOfPoints->emplace_back(tmp);
+
+                    c = c->NextSiblingElement("point");
+                }
+
+                assemblerTranslationAnimation(state,period,vOfPoints);
+
+            }
+
 		}else if(!strcmp(name,"rotate")){
 			
 			XMLElement *e = (XMLElement*) g;
-			assemblerRotate( state,
-						e->FloatAttribute("angle"),
-						e->FloatAttribute("axisX"),
-						e->FloatAttribute("axisY"),
-						e->FloatAttribute("axisZ")
-						);
+
+            if(e->FloatAttribute("period",-1.0) < 0.0 ) {
+                assemblerRotate(state,
+                                e->FloatAttribute("angle"),
+                                e->FloatAttribute("axisX"),
+                                e->FloatAttribute("axisY"),
+                                e->FloatAttribute("axisZ")
+                );
+
+            }else{
+                assemblerRotationAnimation(state,
+                                e->FloatAttribute("period"),
+                                e->FloatAttribute("axisX"),
+                                e->FloatAttribute("axisY"),
+                                e->FloatAttribute("axisZ")
+                );
+            }
 		}else if(!strcmp(name,"scale")){
 		
 			XMLElement *e = (XMLElement*) g;
@@ -303,14 +346,14 @@ Assembler parseGroups(XMLNode * group, Assembler state)
 	return state;
 }
 
-void assemblerInterpret(Assembler reference){
+void assemblerInterpret(Assembler reference, int time){
 
-    branchInterpret(&(reference->root), reference->points ,outbuffer);
+    branchInterpret(&(reference->root), reference->points ,outbuffer,time);
 
 }
 
-void assemblerDraw(Assembler reference){
-    assemblerInterpret(reference);
+void assemblerDraw(Assembler reference, int time){
+    assemblerInterpret(reference, time);
 
     glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);
     glBufferData(
@@ -321,6 +364,7 @@ void assemblerDraw(Assembler reference){
     );
     glVertexPointer(3,GL_FLOAT,0,0);
     glDrawArrays(GL_TRIANGLES, 0, reference->points->size());
+    glutPostRedisplay();
 }
 
 void assemblerOptimize(Assembler reference){

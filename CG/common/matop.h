@@ -18,4 +18,6 @@ void matAssign(float r[4][4], float value[4][4]);
 
 float bernstein(int i, int n, float t);
 
+float** matRotate(float angle, float vx, float vy, float vz);
+
 #endif

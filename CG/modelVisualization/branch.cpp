@@ -21,7 +21,7 @@ using namespace std;
 
 typedef struct animation{
     vector< Branch > * subbranch;
-    float period;
+    int period;
     vector< Point > * auxpoints;
     AnimationType type;
 } * Animation;
@@ -163,7 +163,7 @@ void assemblerModelate( Assembler ass, float x, float y, float z){
 
 /* Animation */
 
-Animation mkAnimation(float period, vector<Point> * controlpoints, AnimationType type){
+Animation mkAnimation(int period, vector<Point> * controlpoints, AnimationType type){
     Animation ani = (Animation)malloc( sizeof(struct animation) );
     ani->type = type;
     ani->period = period;
@@ -182,8 +182,7 @@ void unmkAnimation(Animation ani){
     free(ani);
 }
 
-void assemblerAnimate( Assembler ass, float period, vector<Point> * controlpoints, AnimationType type ){
-
+void assemblerAnimate( Assembler ass, int period, vector<Point> * controlpoints, AnimationType type ){
     switch( view(ass)->type ){
         case EMPTY: {
             view(ass)->node = mkAnimation(period, controlpoints, type);
@@ -208,9 +207,34 @@ void assemblerAnimate( Assembler ass, float period, vector<Point> * controlpoint
     }
 }
 
-void applyAnimation( Animation animation, Point* outgoing, long start, long end){
+void applyRotationAnimation( int period, Point axis, Point* outgoing, long start, long end, int elapsedtime ){
+    float w = (float)elapsedtime / (float)period;
 
+    float ** mat = matRotate(360*w,axis.p[0],axis.p[1],axis.p[2]);
 
+    Transformation t = mkTransformation(mat);
+
+    applyTransformation(t ,outgoing, start, end);
+
+    unmkTransformation(t);
+
+}
+
+void applyTranslationAnimation( int period, vector<Point> * axis, Point* outgoing, long start, long end, int elapsed_time ){
+
+}
+
+void applyAnimation( Animation animation, Point* outgoing, long start, long end, int time){
+    switch( animation->type ){
+
+        case ROTATION:
+            applyRotationAnimation(animation->period, animation->auxpoints->at(0), outgoing, start, end, time);
+            break;
+        case CURVED_TRANSLATION:
+            applyTranslationAnimation(animation->period, animation->auxpoints, outgoing, start, end, time);
+            break;
+
+    }
 }
 
 /* Branch */
@@ -269,7 +293,7 @@ void unmkBranch( Branch b ){
     free(b);
 }
 
-Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints){
+Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints, int time){
 
     switch( b->type ){
 
@@ -280,13 +304,13 @@ Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints){
             long maxv = -1;
 
             for(Branch desbranch : *(ani->subbranch) ) {
-                Model mod = recInterpret(desbranch, inpoints, outpoints);
+                Model mod = recInterpret(desbranch, inpoints, outpoints,time);
                 minv = min(minv,mod->starti);
                 maxv = max(maxv,mod->endi);
                 unmkModel(mod);
             }
-
-            applyAnimation(ani, outpoints, minv, maxv);
+            printf("hey\n");
+            applyAnimation(ani, outpoints, minv, maxv, time);
 
             if( minv > maxv )
                 return mkModel(minv,maxv);
@@ -303,7 +327,7 @@ Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints){
             long maxv = -1;
 
             for(Branch desbranch : *(t->subbranch) ) {
-                Model mod = recInterpret(desbranch, inpoints, outpoints);
+                Model mod = recInterpret(desbranch, inpoints, outpoints,time);
                 minv = min(minv,mod->starti);
                 maxv = max(maxv,mod->endi);
                 unmkModel(mod);
@@ -335,8 +359,8 @@ Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints){
     }
 }
 
-void branchInterpret(Branch b, vector<Point>* inpoints, Point* outpoints){
-    unmkModel(recInterpret(b, inpoints, outpoints));
+void branchInterpret(Branch b, vector<Point>* inpoints, Point* outpoints, int time){
+    unmkModel(recInterpret(b, inpoints, outpoints,time));
 }
 
 void branchOptimizeTransf( Branch b ){

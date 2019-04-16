@@ -47,7 +47,9 @@ void renderScene() {
 
 	glColor3f(1.0,1.0,1.0);
 
-    assemblerDraw(mainframe);
+	int time = glutGet(GLUT_ELAPSED_TIME);
+
+    assemblerDraw(mainframe, time);
 
 	glutSwapBuffers();
 }
