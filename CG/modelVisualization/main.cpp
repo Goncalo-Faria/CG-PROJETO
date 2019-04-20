@@ -1,17 +1,19 @@
 #if defined(_WIN32)
     #include "GL/glut.h"
 #else
-    #include <GLUT/glut.h>
+    #include <GL/glew.h>
+    #include <GL/glut.h>
 #endif
 #include "assembler.h"
 #include <iostream>
 #include <cmath>
 
+
 using namespace std;
 
 float camX = 0, camY, camZ = 5;
 int startX, startY, tracking = 0;
-int alpha = 0, beta = 0, r = 5;
+int alpha = 0, beta = 0, r = 70;
 
 Assembler mainframe;
 
@@ -111,6 +113,8 @@ void glut(int argc, char **argv) {
 	glutInitWindowSize(1450,900);
     glutCreateWindow(argv[1]);
 
+    glewInit();
+
     glutDisplayFunc(renderScene);
     glutReshapeFunc(changeSize);
 
@@ -130,8 +134,8 @@ int main(int argc, char ** argv) {
 		cout << "No scene file provided." << endl;
 		return 2;
 	}
-	
-	mainframe = mkAssembler(argv[1]);
+
+    mainframe = mkAssembler(argv[1]);
 
 	if (!mainframe) {
         cout << "File not found" << endl;

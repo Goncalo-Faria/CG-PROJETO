@@ -1,7 +1,7 @@
 #if defined(_WIN32)
     #include "GL/glut.h"
 #else
-	#include <GLUT/glut.h>
+	#include <GL/glut.h>
 #endif
 
 #include "branch.h"
