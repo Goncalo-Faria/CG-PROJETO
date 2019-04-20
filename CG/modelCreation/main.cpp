@@ -6,8 +6,8 @@
 
 #if defined(_WIN32)
     #include "GL/glut.h"
-#else
-    #include <GLUT/glut.h>
+#elsexml/sphere.xml
+    #include <GL/glut.h>
 #include <iostream>
 
 #endif
