@@ -1,7 +1,8 @@
 #if defined(_WIN32)
     #include "GL/glut.h"
 #else
-	#include <GLUT/glut.h>
+    #include <GL/glew.h>
+	#include <GL/glut.h>
 #endif
 
 #include "assembler.h"
@@ -14,6 +15,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <iostream>
 
 using namespace std;
 using namespace tinyxml2;
@@ -122,19 +124,21 @@ Assembler mkAssemblerModelView(Assembler origin){
 
 Assembler mkAssembler(const char * filename){
     XMLDocument xml_doc;
-    //cout << "parse" << endl;
+    cout << "parse" << endl;
     XMLError eResult =
             xml_doc.LoadFile(filename);
 
     if (eResult != XML_SUCCESS) {
-        //cout << "parse" << endl;
-        return NULL;
+        cout << "error" << endl;
+        return nullptr;
     }
 
     XMLNode* root = xml_doc.FirstChildElement("scene");
 
-    if (root == nullptr)
-        return NULL;
+    if (root == nullptr) {
+        cout << "no root" << endl;
+        return nullptr;
+    }
 
     Assembler frame = mkAssembler();
 
