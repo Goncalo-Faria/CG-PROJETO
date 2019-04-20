@@ -29,7 +29,10 @@
             <!-- PLANETS -->
             <group>
                 <!-- MERCURY -->
-                <group>
+                <scale stretchX='2' stretchY='1' stretchZ='2' />
+                <rotate period="5000" angle="360" axisX="0" axisY="1" axisZ="0"/>
+                <scale stretchX='0.5' stretchY='1' stretchZ='0.5' />
+		<group>
                     <rotate period="5000" axisX="0" axisY="1" axisZ="0"/>
                     <translate X='5' Y='0' Z='0' />
                     <scale stretchX='0.22' stretchY='0.22' stretchZ='0.22' />
