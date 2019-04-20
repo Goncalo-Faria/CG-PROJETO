@@ -1,7 +1,7 @@
 #if defined(_WIN32)
     #include "GL/glut.h"
 #else
-	#include <GL/glut.h>
+    #include <GLUT/glut.h>
 #endif
 
 #include "branch.h"
@@ -14,7 +14,6 @@
 #include <sstream>
 #include <string>
 #include <cmath>
-
 
 using namespace std;
 

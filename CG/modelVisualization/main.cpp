@@ -1,8 +1,8 @@
 #if defined(_WIN32)
     #include "GL/glut.h"
+    #include "GL/glew.h"
 #else
-    #include <GL/glew.h>
-    #include <GL/glut.h>
+    #include <GLUT/glut.h>
 #endif
 #include "assembler.h"
 #include <iostream>
@@ -113,7 +113,9 @@ void glut(int argc, char **argv) {
 	glutInitWindowSize(1450,900);
     glutCreateWindow(argv[1]);
 
-    glewInit();
+    #ifndef __APPLE__
+        glewInit();
+    #endif
 
     glutDisplayFunc(renderScene);
     glutReshapeFunc(changeSize);

@@ -1,9 +1,9 @@
 #define _USE_MATH_DEFINES
 
 #if defined(_WIN32)
-    #include "GL/glut.h"
+    #include "GLUT/glut.h"
 #else
-	#include <GL/glut.h>
+	#include <GLUT/glut.h>
 #endif
 
 #include "coordinateFrame.h"
