@@ -9,16 +9,15 @@
         </group>
         <group>
             <!-- COMET -->
-            <scale stretchX='0.2' stretchY='0.2' stretchZ='0.2' />
             <translate period="25000">
-                <point X="300" Y="0" Z="0"/>
-                <point X="210" Y="0" Z="42"/>
-                <point X="0" Y="0" Z="60"/>
-                <point X="-210" Y="0" Z="42"/>
-                <point X="-300" Y="0" Z="0"/>
-                <point X="-210" Y="0" Z="-42"/>
-                <point X="0" Y="0" Z="-60"/>
-                <point X="210" Y="0" Z="-42"/>
+                <point X="60" Y="0" Z="0"/>
+                <point X="42" Y="0" Z="8.4"/>
+                <point X="0" Y="0" Z="12"/>
+                <point X="-42" Y="0" Z="8.4"/>
+                <point X="-60" Y="0" Z="0"/>
+                <point X="-42" Y="0" Z="-8.4"/>
+                <point X="0" Y="0" Z="-12"/>
+                <point X="42" Y="0" Z="-8.4"/>
             </translate>
 	    <rotate period= "1000" axisX="1" axisY="0" axisZ="1" />
             <models>

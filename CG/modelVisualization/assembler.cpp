@@ -1,8 +1,8 @@
 #if defined(_WIN32)
     #include "GL/glut.h"
+    #include "GL/glew.h"
 #else
-    #include <GL/glew.h>
-	#include <GL/glut.h>
+    #include <GLUT/glut.h>
 #endif
 
 #include "assembler.h"
@@ -124,7 +124,7 @@ Assembler mkAssemblerModelView(Assembler origin){
 
 Assembler mkAssembler(const char * filename){
     XMLDocument xml_doc;
-    cout << "parse" << endl;
+    //cout << "parse" << endl;
     XMLError eResult =
             xml_doc.LoadFile(filename);
 
