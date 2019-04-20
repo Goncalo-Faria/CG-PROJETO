@@ -30,7 +30,7 @@
             <group>
                 <!-- MERCURY -->
                 <scale stretchX='2' stretchY='1' stretchZ='2' />
-                <rotate period="5000" angle="360" axisX="0" axisY="1" axisZ="0"/>
+                <rotate period="5000" axisX="0" axisY="1" axisZ="0"/>
                 <scale stretchX='0.5' stretchY='1' stretchZ='0.5' />
 		<group>
                     <rotate period="5000" axisX="0" axisY="1" axisZ="0"/>
