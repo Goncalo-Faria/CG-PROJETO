@@ -19,6 +19,7 @@
                 <point X="0" Y="0" Z="-12"/>
                 <point X="42" Y="0" Z="-8.4"/>
             </translate>
+	    <scale stretchX="0.4" stretchY="0.4" stretchZ="0.4" />
 	    <rotate period= "1000" axisX="1" axisY="0" axisZ="1" />
             <models>
                 <model file='../xml/teapot.xml' />

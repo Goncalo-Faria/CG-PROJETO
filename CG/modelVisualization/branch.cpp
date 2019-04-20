@@ -301,7 +301,7 @@ void applyTranslationAnimation( int period, vector<Point> * axis, Point* outgoin
     freeMat(p2);
 
     unmkTransformation(t);
-
+    /*
     float posi[3];
     float derivi[3];
     glBegin(GL_LINE_LOOP);
@@ -310,7 +310,7 @@ void applyTranslationAnimation( int period, vector<Point> * axis, Point* outgoin
         glVertex3f(posi[0],posi[1],posi[2]);
     }
     glEnd();
-
+    */
 
     axis->emplace_back(norm);
 
