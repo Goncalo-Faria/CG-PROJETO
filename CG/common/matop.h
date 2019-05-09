@@ -1,32 +1,34 @@
 #ifndef mat_h_
 #define mat_h_
 
-float** identity();
-float** zeros();
-void freeMat(float** t);
+typedef struct mat *Mat;
 
-float** matRx(float angle);
-float** matRy(float angle);
-float** matRz(float angle);
+Mat identity();
+Mat zeros();
+void freeMat(Mat t);
 
-float** matmul(float** a, float** b);
-float** matmul(float a[4][4], float** b);
+Mat matRx(float angle);
+Mat matRy(float angle);
+Mat matRz(float angle);
 
-void matAssign(float**r, float**value);
-void matAssign(float r[4][4], float**value);
+Mat matmul(Mat a, Mat b);
+Mat matmul(float a[4][4], Mat b);
+
+void matAssign(Mat r, Mat value);
+void matAssign(float r[4][4], Mat value);
 void matAssign(float r[4][4], float value[4][4]);
 
 float bernstein(int i, int n, float t);
 
-float** matRotate(float angle, float vx, float vy, float vz);
-float ** matTranslate(float x, float y, float z);
-float** matScale(float xaxis, float yaxis, float zaxis);
+Mat matRotate(float angle, float vx, float vy, float vz);
+Mat matTranslate(float x, float y, float z);
+Mat matScale(float xaxis, float yaxis, float zaxis);
 
-float * vecmul(float**mat, float* vec);
+float * vecmul( Mat mat, float* vec );
 float * vecmul( float mat[4][4] ,float * vec, int n);
 
 float* crossVecProd(float *a, float *b);
 
-float ** upsidemat(float*deriv , float*norm);
+Mat upsidemat(float*deriv , float*norm);
 
 #endif

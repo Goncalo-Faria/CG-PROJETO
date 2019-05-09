@@ -2,15 +2,15 @@
 #define branch_h
 
 typedef unsigned char BranchType;
-    #define EMPTY 0    
-    #define FAKE 1
-    #define ANIMATION 2
-    #define TRANSFORMATION 3
-    #define MODEL 4
+#define EMPTY 0
+#define FAKE 1
+#define ANIMATION 2
+#define TRANSFORMATION 3
+#define MODEL 4
 
 typedef unsigned char AnimationType;
-    #define CURVED_TRANSLATION 9
-    #define ROTATION 8
+#define CURVED_TRANSLATION 9
+#define ROTATION 8
 
 typedef struct branch{
     BranchType type;
@@ -24,6 +24,7 @@ typedef struct model *Model;
 #include "assembler.h"
 #include <vector>
 #include "../common/point.h"
+#include "../common/matop.h"
 
 Branch mkBranch( Transformation t );
 Branch mkBranch( Animation a );
@@ -35,9 +36,9 @@ void unmkBranch( Branch b );
 void addDescendent( Animation ani, Branch descendent );
 void addDescendent( Transformation t, Branch descendent );
 
-Transformation mkTransformation(float ** mat);
+Transformation mkTransformation(Mat mat);
 void unmkTransformation( Transformation t);
-void assemblerTransformate( Assembler ass, float ** mat);
+void assemblerTransformate( Assembler ass, Mat mat);
 
 Model mkModel(long start, long end);
 void unmkModel(Model model);

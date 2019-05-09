@@ -1,7 +1,7 @@
 #if defined(_WIN32)
-    #include "GL/glut.h"
+#include "GL/glut.h"
 #else
-    #include <GLUT/glut.h>
+#include <GLUT/glut.h>
 #endif
 
 #include "branch.h"
@@ -30,15 +30,17 @@ typedef struct animation{
 typedef struct model{
     long starti;/* including */
     long endi;/* not including */
+    GLuint buffer;
+    vector< Point > * points;
 } *Model;
 
 typedef struct transformation{
     vector< Branch > * subbranch;
-    float **mat;
+    Mat mat;
 } * Transformation;
 
 /* Transformation*/
-Transformation mkTransformation( float ** mat){
+Transformation mkTransformation(Mat mat){
     Transformation t = (Transformation)malloc( sizeof(struct transformation) );
     t->subbranch = new vector<Branch>();
     t->mat = mat;
@@ -51,14 +53,10 @@ void unmkTransformation( Transformation t){
 
     delete t->subbranch;
 
-    for(int i=0; i< 4; i++)
-        free(t->mat[i]);
-    free(t->mat);
-
-    free(t);
+    freeMat(t->mat);
 }
 
-void assemblerTransformate( Assembler ass, float ** mat){
+void assemblerTransformate( Assembler ass, Mat mat){
 
     switch( view(ass)->type ){
         case EMPTY: {
@@ -74,7 +72,7 @@ void assemblerTransformate( Assembler ass, float ** mat){
 
         case TRANSFORMATION: {
             Transformation tmp3 = (Transformation) view(ass)->node;
-            float **tmp2 = matmul(tmp3->mat, mat);
+            Mat tmp2 = matmul(tmp3->mat, mat);
             freeMat(tmp3->mat);
             tmp3->mat = tmp2;
             break;
@@ -99,7 +97,7 @@ void applyTransformation( Transformation transformation, Point* outgoing, long s
         p[0] = outgoing[s].p[0];
         p[1] = outgoing[s].p[1];
         p[2] = outgoing[s].p[2];
-      
+
         float*tmp = vecmul( transformation->mat ,p);
 
         point.p[0] = tmp[0] ;
@@ -117,6 +115,9 @@ Model mkModel(long start, long end){
     Model m = (Model)malloc( sizeof(struct model) );
     m->starti = start;
     m->endi = end;
+    m->buffer = -1;
+    m->points = new vector< Point >();
+
     return m;
 }
 
@@ -159,6 +160,7 @@ void assemblerModelate( Assembler ass, float x, float y, float z){
     p.p[2]=z;
 
     assemblerPoint(ass, p);
+    //mo->points->emplace_back(p);
 
     mo->endi++;
 }
@@ -181,7 +183,7 @@ void unmkAnimation(Animation ani){
 
     delete ani->subbranch;
     delete ani->auxpoints;
-    
+
     free(ani);
 }
 
@@ -215,7 +217,7 @@ void assemblerAnimate( Assembler ass, int period, vector<Point> * controlpoints,
 void applyRotationAnimation( int period, Point axis, Point* outgoing, long start, long end, int elapsedtime ){
     float w = (float)elapsedtime / (float)period;
 
-    float ** mat = matRotate(360*w,axis.p[0],axis.p[1],axis.p[2]);
+    Mat mat = matRotate(360*w,axis.p[0],axis.p[1],axis.p[2]);
 
     Transformation t = mkTransformation(mat);
 
@@ -290,8 +292,8 @@ void applyTranslationAnimation( int period, vector<Point> * axis, Point* outgoin
 
     getGlobalCatmullRomPoint( gt, pos, deriv, axis);
 
-    float **p1 = matTranslate(pos[0], pos[1],pos[2]);
-    float **p2 = upsidemat(deriv,norm.p);
+    Mat p1 = matTranslate(pos[0], pos[1],pos[2]);
+    Mat p2 = upsidemat(deriv,norm.p);
 
     Transformation t = mkTransformation(matmul(p1,p2));
 
@@ -343,7 +345,7 @@ Branch mkBranch( Transformation t ){
     Branch b =  (Branch)malloc( sizeof(struct branch) );
     b->type = TRANSFORMATION;
     b->node = t;
-    return b; 
+    return b;
 }
 
 Branch mkBranch( Animation a ){
@@ -390,20 +392,20 @@ Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints, int time
     switch( b->type ){
 
         case ANIMATION: {
-          
+
             Animation ani = (Animation)b->node;
             long minv = inpoints->size();
             long maxv = -1;
 
             for(Branch desbranch : *(ani->subbranch) ) {
-              
+
                 Model mod = recInterpret(desbranch, inpoints, outpoints,time);
-              
+
                 minv = min(minv,mod->starti);
                 maxv = max(maxv,mod->endi);
                 unmkModel(mod);
             }
-          
+
             applyAnimation(ani, outpoints, minv, maxv, time);
 
             if( minv < maxv )
@@ -423,7 +425,7 @@ Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints, int time
             for(Branch desbranch : *(t->subbranch) ) {
 
                 Model mod = recInterpret(desbranch, inpoints, outpoints,time);
-              
+
                 minv = min(minv,mod->starti);
                 maxv = max(maxv,mod->endi);
                 unmkModel(mod);
@@ -445,7 +447,7 @@ Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints, int time
             //printf(" %ld - %ld   \n", mo->starti, mo->endi);
             for(long i = mo->starti; i < mo->endi; i++)
                 outpoints[i] = inpoints->at(i);
-          
+
             return mkModel(mo->starti,mo->endi);
         }
 
@@ -525,7 +527,7 @@ void branchOptimizeTransf( Branch b ){
                 //printf("chop\n");
                 Transformation ut = (Transformation) t->subbranch->at(0)->node;
 
-                float** nmat = matmul(t->mat, ut->mat); /* a transformação torna-se a composição das duas transformações*/
+                Mat nmat = matmul(t->mat, ut->mat); /* a transformação torna-se a composição das duas transformações*/
 
                 freeMat(t->mat);/* apaga matrizes antigas*/
                 freeMat(ut->mat);/* apaga matrizes antigas*/
