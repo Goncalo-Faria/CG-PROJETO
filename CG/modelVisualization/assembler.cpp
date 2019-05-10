@@ -351,10 +351,7 @@ void assemblerInterpret(Assembler reference, int time){
     branchInterpret(&(reference->root), reference->points ,outbuffer,time);
 }
 
-//glMapBuffer(	GLenum target, acess)
-
 void assemblerDraw(Assembler reference, int time){
-
 
     glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);
 
@@ -367,7 +364,10 @@ void assemblerDraw(Assembler reference, int time){
     glVertexPointer(3,GL_FLOAT,0,0);
     glDrawArrays(GL_TRIANGLES, 0, reference->points->size());
 
+    //branchDraw( &(reference->root) );
+
     glutPostRedisplay();
+
 }
 
 void assemblerOptimize(Assembler reference){
@@ -377,9 +377,12 @@ void assemblerOptimize(Assembler reference){
 
 void assemblerBufferData(Assembler reference){
 
+    glEnableClientState(GL_VERTEX_ARRAY);
+
     assemblerOptimize(reference);
 
-    glEnableClientState(GL_VERTEX_ARRAY);
+    //branchBufferData(&(reference->root) );
+
     glGenBuffers(1, &(reference->buffer) );
     glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);
     glBufferData(

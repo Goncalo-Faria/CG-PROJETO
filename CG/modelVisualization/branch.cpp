@@ -122,6 +122,7 @@ Model mkModel(long start, long end){
 }
 
 void unmkModel(Model model){
+    delete model->points;
     free(model);
 }
 
@@ -160,7 +161,7 @@ void assemblerModelate( Assembler ass, float x, float y, float z){
     p.p[2]=z;
 
     assemblerPoint(ass, p);
-    //mo->points->emplace_back(p);
+    mo->points->emplace_back(p);
 
     mo->endi++;
 }
@@ -229,10 +230,7 @@ void applyRotationAnimation( int period, Point axis, Point* outgoing, long start
 
 void getCatmullRomPoint(float t,Point p0, Point p1, Point p2, Point p3, float *pos, float *deriv) {
     // catmull-rom matrix
-    float m[4][4] = {	{-0.5f,  1.5f, -1.5f,  0.5f},
-                         { 1.0f, -2.5f,  2.0f, -0.5f},
-                         {-0.5f,  0.0f,  0.5f,  0.0f},
-                         { 0.0f,  1.0f,  0.0f,  0.0f}};
+    Mat m = catMullMat();
     // Compute A = M * P
     float * a[3];
     float x[4] = { p0.p[0],p1.p[0],p2.p[0],p3.p[0] };
@@ -564,8 +562,31 @@ void branchOptimizeModels( vector<Point> * points, Branch b){
         case ANIMATION: {
             Animation t = (Animation)b->node;
 
-            for( Branch nb : *(t->subbranch) )
+            bool allmodels = true;
+
+            for( Branch nb : *(t->subbranch) ) {
                 branchOptimizeModels(points, nb);
+                allmodels = allmodels && (nb->type == MODEL);
+            }
+
+            if( allmodels ){ /* every descendent is a model*/
+
+                Model nm = mkModel(points->size(),-1);
+
+                for( long i =0; i < t->subbranch->size(); i++ ) { /* transforms the models and combines them*/
+                    Model model = (Model)(t->subbranch->at(i)->node);
+                    nm->starti = min(nm->starti,model->starti);
+                    nm->endi = max(nm->endi,model->endi);
+                    nm->points->insert(nm->points->end(), model->points->begin(), model->points->end());// append data
+                    unmkBranch(t->subbranch->at(i));
+                }
+
+                delete t->subbranch;
+
+                t->subbranch = new vector<Branch>();
+                t->subbranch->emplace_back(mkBranch(nm));
+
+            }
 
             break;
         }
@@ -582,14 +603,17 @@ void branchOptimizeModels( vector<Point> * points, Branch b){
 
             if( allmodels ){ /* every descendent is a model*/
 
-                long minv = points->size();
-                long maxv = -1;
+                Model nm = mkModel(points->size(),-1);
 
                 for( long i =0; i < t->subbranch->size(); i++ ) { /* transforms the models and combines them*/
                     Model model = (Model)(t->subbranch->at(i)->node);
-                    minv = min(minv,model->starti);
-                    maxv = max(maxv,model->endi);
+                    nm->starti = min(nm->starti,model->starti);
+                    nm->endi = max(nm->endi,model->endi);
+
                     applyTransformation(t, points->data(), model->starti, model->endi);
+                    applyTransformation(t, model->points->data(), 0, model->points->size());
+
+                    nm->points->insert(nm->points->end(), model->points->begin(), model->points->end());// append data
                     unmkBranch(t->subbranch->at(i));
                 }
 
@@ -597,7 +621,7 @@ void branchOptimizeModels( vector<Point> * points, Branch b){
                 freeMat(t->mat);
                 free(t);
 
-                b->node = mkModel(minv,maxv);
+                b->node = nm;
                 b->type = MODEL;/*agregates everything in a single model.*/
             }
 
@@ -612,4 +636,83 @@ void branchOptimize(vector<Point> * points, Branch root){
     branchOptimizeTransf(root);
     branchOptimizeModels(points,root);
 
+}
+
+void branchBufferData(Branch root){
+    switch( root->type ){
+        case EMPTY: { break; }
+
+        case ANIMATION: {
+            Animation t = (Animation)root->node;
+
+            for( Branch nb : *(t->subbranch) )
+                branchBufferData(nb);
+
+            break;
+        }
+
+        case TRANSFORMATION: {
+            Transformation t = (Transformation)root->node;
+
+            for( Branch nb : *(t->subbranch) ) {
+                branchBufferData(nb);
+            }
+
+            break;
+        }
+
+        case MODEL: {
+            Model m = (Model)root->node;
+
+            m->points->shrink_to_fit();
+
+
+            glGenBuffers(1, &(m->buffer) );
+            glBindBuffer(GL_ARRAY_BUFFER, m->buffer);
+            glBufferData(
+                    GL_ARRAY_BUFFER,
+                    m->points->size() * sizeof(Point),
+                    &(m->points->at(0)),
+                    GL_STATIC_DRAW
+            );
+
+            break;
+        }
+    }
+}
+
+void branchDraw(Branch root){
+    switch( root->type ){
+        case EMPTY: { break; }
+
+        case ANIMATION: {
+            Animation t = (Animation)root->node;
+
+            for( Branch nb : *(t->subbranch) )
+                branchDraw(nb);
+
+            break;
+        }
+
+        case TRANSFORMATION: {
+            Transformation t = (Transformation)root->node;
+
+            for( Branch nb : *(t->subbranch) ) {
+                branchDraw(nb);
+            }
+
+            break;
+        }
+
+        case MODEL: {
+            Model m = (Model)root->node;
+
+            glBindBuffer(GL_ARRAY_BUFFER, m->buffer);
+
+            glVertexPointer(3,GL_FLOAT,0,0);
+            glDrawArrays(GL_TRIANGLES, 0, m->points->size());
+
+            break;
+        }
+    }
 }

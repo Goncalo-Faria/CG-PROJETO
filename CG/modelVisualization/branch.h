@@ -50,6 +50,8 @@ void assemblerAnimate( Assembler ass, int period, std::vector<Point> * controlpo
 
 void branchInterpret(Branch b, std::vector<Point>* inpoints, Point * outpoints, int time);
 
+void branchBufferData(Branch root);
 void branchOptimize(std::vector<Point> * points , Branch b);
+void branchDraw(Branch root);
 
 #endif

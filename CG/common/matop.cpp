@@ -7,6 +7,14 @@ typedef struct mat{
     float ** mat;
 } *Mat;
 
+static int get(Mat t, int i, int j){
+    return t->mat[i][j];
+}
+
+static void set(Mat t, int i, int j, float value){
+    t->mat[i][j] = value;
+}
+
 Mat identity(){
     Mat m = (Mat)malloc(sizeof(struct mat));
     m->mat = (float**)malloc(sizeof(float*)*4);
@@ -25,7 +33,7 @@ Mat zeros(){
     for(int i = 0; i< 4; i++) {
         m->mat[i] = (float*)malloc( sizeof(float) * 4 );
         for (int j = 0; j < 4; j++)
-            m->mat[i][j] = 0;
+            set(m, i, j, 0);
     }
 
     return m;
@@ -45,10 +53,10 @@ Mat matRx(float angle){
 
     float rad = (M_PI/180.0)*angle;
 
-    m->mat[1][1] = cos(rad);
-    m->mat[1][2] = -sin(rad);
-    m->mat[2][1] = sin(rad);
-    m->mat[2][2] = cos(rad);
+    set(m,1,1,cos(rad));
+    set(m,1,2,-sin(rad));
+    set(m,2,1,sin(rad));
+    set(m,2,2,cos(rad));
 
     return m;
 }
@@ -58,10 +66,10 @@ Mat matRy(float angle){
 
     float rad = (M_PI/180.0)*angle;
 
-    t->mat[0][0] = cos(rad);
-    t->mat[0][2] = sin(rad);
-    t->mat[2][0] = -sin(rad);
-    t->mat[2][2] = cos(rad);
+    set(t,0,0,cos(rad));
+    set(t,0,2,sin(rad));
+    set(t,2,0,-sin(rad));
+    set(t,2,2,cos(rad));
 
     return t;
 }
@@ -71,10 +79,10 @@ Mat matRz(float angle){
 
     float rad = (M_PI/180.0)*angle;
 
-    t->mat[0][0] = cos(rad);
-    t->mat[0][1] = -sin(rad);
-    t->mat[1][0] = sin(rad);
-    t->mat[1][1] = cos(rad);
+    set(t,0,0,cos(rad));
+    set(t,0,1,-sin(rad));
+    set(t,1,0, sin(rad));
+    set(t,1,1,cos(rad));
 
     return t;
 }
@@ -85,7 +93,7 @@ Mat matmul(Mat a, Mat b){
     for( int i = 0; i<4; i++ )
         for(int j = 0;j<4; j++)
             for(int k = 0; k<4; k++)
-                result->mat[i][j] += a->mat[i][k] *  b->mat[k][j];
+                set(result,i,j, get(result,i,j) + get(a,i,k)*get(b,k,j) );
 
     return result;
 }
@@ -100,6 +108,14 @@ float* crossVecProd(float *a, float *b) {
 
     return res;
 }
+
+void matAssign(Mat r, float value[4][4]){
+
+    for( int i = 0; i<4; i++ )
+        for(int j = 0;j<4; j++)
+            set(r,i,j,value[i][j]);
+}
+
 
 Mat upsidemat(float*deriv , float*norm){
 
@@ -125,28 +141,17 @@ Mat upsidemat(float*deriv , float*norm){
 
     free(yn);
 
-    float** mat = (float**)malloc(sizeof(float*)*4);
+    Mat m = zeros();
 
-    mat[0] = (float*)malloc(sizeof(float)*4);
+    set(m,0,0,deriv[0]); set(m,0,1,norm[0]); set(m,0,2,z[0]); set(m,0,3,0);
 
-    mat[0][0] = deriv[0]; mat[0][1]=norm[0]; mat[0][2]=z[0]; mat[0][3]=0;
+    set(m,1,0,deriv[1]); set(m,1,1,norm[1]); set(m,1,2,z[1]); set(m,1,3,0);
 
-    mat[1] = (float*)malloc(sizeof(float)*4);
+    set(m,2,0,deriv[2]); set(m,2,1,norm[2]); set(m,2,2,z[2]); set(m,2,3,0);
 
-    mat[1][0] = deriv[1]; mat[1][1]=norm[1]; mat[1][2]=z[1]; mat[1][3]=0;
-
-    mat[2] = (float*)malloc(sizeof(float)*4);
-
-    mat[2][0] = deriv[2]; mat[2][1]=norm[2]; mat[2][2]=z[2]; mat[2][3]=0;
-
-    mat[3] = (float*)malloc(sizeof(float)*4);
-
-    mat[3][0] = 0; mat[3][1]=0; mat[3][2]=0; mat[3][3]=1;
+    set(m,3,0,0); set(m,3,1,0); set(m,3,2,0); set(m,3,3,1);
 
     free(z);
-
-    Mat m = (Mat)malloc(sizeof(struct mat));
-    m->mat = mat;
 
     return m;
 }
@@ -158,33 +163,34 @@ float * vecmul( Mat mat ,float * vec){
     for(int i=0; i< 3; i++){
         r[i] = 0;
         for(int j=0; j< 4; j++)
-            r[i] += mat->mat[i][j] * vec[j];
+            r[i] += get(mat,i,j) * vec[j];
     }
 
     return r;
 }
 
-float * vecmul( float mat[4][4] ,float * vec, int n){
+float * vecmul( Mat mat ,float * vec, int n){
 
     float * r = (float*)malloc( sizeof(float)*n);
 
     for(int i=0; i< n; i++){
         r[i] = 0;
         for(int j=0; j< 4; j++)
-            r[i] += mat[i][j] * vec[j];
+            r[i] += get(mat,i,j) * vec[j];
     }
 
     return r;
 }
 
+Mat catMullMat(){
+    float m[4][4] = {{-0.5f,  1.5f, -1.5f,  0.5f},
+                     { 1.0f, -2.5f,  2.0f, -0.5f},
+                     {-0.5f,  0.0f,  0.5f,  0.0f},
+                     { 0.0f,  1.0f,  0.0f,  0.0f}};
 
-Mat matmul(float a[4][4], Mat b){
     Mat result = zeros();
 
-    for( int i = 0; i<4; i++ )
-        for(int j = 0;j<4; j++)
-            for(int k = 0; k<4; k++)
-                result->mat[i][j] += a[i][k] *  b->mat[k][j];
+    matAssign(result,m);
 
     return result;
 }
@@ -216,9 +222,9 @@ Mat matRotate(float angle, float vx, float vy, float vz){
 Mat matTranslate(float x, float y, float z){
     Mat t = identity();
 
-    t->mat[0][3] = x;
-    t->mat[1][3] = y;
-    t->mat[2][3] = z;
+    set(t,0,3,x);
+    set(t,1,3,y);
+    set(t,2,3,z);
 
     return t;
 }
@@ -226,9 +232,9 @@ Mat matTranslate(float x, float y, float z){
 Mat matScale(float xaxis, float yaxis, float zaxis){
     Mat t = identity();
 
-    t->mat[0][0] = xaxis;
-    t->mat[1][1] = yaxis;
-    t->mat[2][2] = zaxis;
+    set(t,0,0,xaxis);
+    set(t,1,1,yaxis);
+    set(t,2,2,zaxis);
 
     return t;
 }
@@ -237,28 +243,7 @@ void matAssign(Mat r, Mat value){
 
     for( int i = 0; i<4; i++ )
         for(int j = 0;j<4; j++)
-            r->mat[i][j] = value->mat[i][j];
-}
-
-void matAssign(float r[4][4], Mat value){
-
-    for( int i = 0; i<4; i++ )
-        for(int j = 0;j<4; j++)
-            r[i][j] = value->mat[i][j];
-}
-
-void matAssign(float r[4][4], float value[4][4] ){
-
-    for( int i = 0; i<4; i++ )
-        for(int j = 0;j<4; j++)
-            r[i][j] = value[i][j];
+            set(r,i,j,get(value,i,j));
 }
 
 int factorial(int n){ return (n < 2) ? 1 : n*factorial(n-1); }
-
-float bernstein(int i, int n, float t){
-    float r = (float) factorial(n) / (float) (factorial(i) * factorial(n - i));
-    r *= pow(t,i);
-    r *= pow(1-t,n-i);
-    return r;
-}
