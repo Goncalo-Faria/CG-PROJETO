@@ -98,7 +98,7 @@ void applyTransformation( Transformation transformation, Point* outgoing, long s
         p[1] = outgoing[s].p[1];
         p[2] = outgoing[s].p[2];
 
-        float*tmp = vecmul( transformation->mat ,p);
+        float*tmp = vecmul( transformation->mat ,p, 3);
 
         point.p[0] = tmp[0] ;
         point.p[1] = tmp[1];
@@ -576,8 +576,10 @@ void branchOptimizeModels( vector<Point> * points, Branch b){
                 for( long i =0; i < t->subbranch->size(); i++ ) { /* transforms the models and combines them*/
                     Model model = (Model)(t->subbranch->at(i)->node);
                     nm->starti = min(nm->starti,model->starti);
-                    nm->endi = max(nm->endi,model->endi);
+                    nm->endi = max(nm->endi,model->endi)
+                            ;
                     nm->points->insert(nm->points->end(), model->points->begin(), model->points->end());// append data
+
                     unmkBranch(t->subbranch->at(i));
                 }
 
@@ -611,9 +613,10 @@ void branchOptimizeModels( vector<Point> * points, Branch b){
                     nm->endi = max(nm->endi,model->endi);
 
                     applyTransformation(t, points->data(), model->starti, model->endi);
-                    applyTransformation(t, model->points->data(), 0, model->points->size());
 
+                    applyTransformation(t, model->points->data(), 0, model->points->size());
                     nm->points->insert(nm->points->end(), model->points->begin(), model->points->end());// append data
+
                     unmkBranch(t->subbranch->at(i));
                 }
 

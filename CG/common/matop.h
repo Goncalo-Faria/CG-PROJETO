@@ -17,7 +17,6 @@ Mat matRotate(float angle, float vx, float vy, float vz);
 Mat matTranslate(float x, float y, float z);
 Mat matScale(float xaxis, float yaxis, float zaxis);
 
-float * vecmul( Mat mat, float* vec );
 float * vecmul( Mat mat ,float * vec, int n);
 
 float* crossVecProd(float *a, float *b);

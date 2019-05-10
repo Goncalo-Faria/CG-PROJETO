@@ -7,7 +7,7 @@ typedef struct mat{
     float ** mat;
 } *Mat;
 
-static int get(Mat t, int i, int j){
+static float get(Mat t, int i, int j){
     return t->mat[i][j];
 }
 
@@ -15,23 +15,29 @@ static void set(Mat t, int i, int j, float value){
     t->mat[i][j] = value;
 }
 
-Mat identity(){
+static Mat alloc(){
+
     Mat m = (Mat)malloc(sizeof(struct mat));
     m->mat = (float**)malloc(sizeof(float*)*4);
-    for(int i = 0; i< 4; i++) {
+    for(int i = 0; i< 4; i++)
         m->mat[i] = (float*)malloc( sizeof(float) * 4 );
+
+    return m;
+}
+
+Mat identity(){
+    Mat m = alloc();
+    for(int i = 0; i< 4; i++) {
         for (int j = 0; j < 4; j++)
-            m->mat[i][j] = (i == j);
+            set(m, i, j, (i == j));
     }
 
     return m;
 }
 
 Mat zeros(){
-    Mat m = (Mat)malloc(sizeof(struct mat));
-    m->mat = (float**)malloc(sizeof(float*)*4);
+    Mat m = alloc();
     for(int i = 0; i< 4; i++) {
-        m->mat[i] = (float*)malloc( sizeof(float) * 4 );
         for (int j = 0; j < 4; j++)
             set(m, i, j, 0);
     }
@@ -81,7 +87,7 @@ Mat matRz(float angle){
 
     set(t,0,0,cos(rad));
     set(t,0,1,-sin(rad));
-    set(t,1,0, sin(rad));
+    set(t,1,0,sin(rad));
     set(t,1,1,cos(rad));
 
     return t;
@@ -93,10 +99,11 @@ Mat matmul(Mat a, Mat b){
     for( int i = 0; i<4; i++ )
         for(int j = 0;j<4; j++)
             for(int k = 0; k<4; k++)
-                set(result,i,j, get(result,i,j) + get(a,i,k)*get(b,k,j) );
+                set(result,i,j, (get(result,i,j) + get(a,i,k)*get(b,k,j)) );
 
     return result;
 }
+
 
 float* crossVecProd(float *a, float *b) {
 
@@ -108,14 +115,6 @@ float* crossVecProd(float *a, float *b) {
 
     return res;
 }
-
-void matAssign(Mat r, float value[4][4]){
-
-    for( int i = 0; i<4; i++ )
-        for(int j = 0;j<4; j++)
-            set(r,i,j,value[i][j]);
-}
-
 
 Mat upsidemat(float*deriv , float*norm){
 
@@ -143,58 +142,32 @@ Mat upsidemat(float*deriv , float*norm){
 
     Mat m = zeros();
 
-    set(m,0,0,deriv[0]); set(m,0,1,norm[0]); set(m,0,2,z[0]); set(m,0,3,0);
+    set(m,0,0,deriv[0]); set(m,0,1,norm[0]); set(m,0,2,z[0]);
 
-    set(m,1,0,deriv[1]); set(m,1,1,norm[1]); set(m,1,2,z[1]); set(m,1,3,0);
+    set(m,1,0,deriv[1]); set(m,1,1,norm[1]); set(m,1,2,z[1]);
 
-    set(m,2,0,deriv[2]); set(m,2,1,norm[2]); set(m,2,2,z[2]); set(m,2,3,0);
+    set(m,2,0,deriv[2]); set(m,2,1,norm[2]); set(m,2,2,z[2]);
 
-    set(m,3,0,0); set(m,3,1,0); set(m,3,2,0); set(m,3,3,1);
+    set(m,3,3,1);
 
     free(z);
 
     return m;
 }
 
-float * vecmul( Mat mat ,float * vec){
-
-    float * r = (float*)malloc( sizeof(float)*3);
-
-    for(int i=0; i< 3; i++){
-        r[i] = 0;
-        for(int j=0; j< 4; j++)
-            r[i] += get(mat,i,j) * vec[j];
-    }
-
-    return r;
-}
-
-float * vecmul( Mat mat ,float * vec, int n){
+float * vecmul( Mat m ,float * vec, int n){
 
     float * r = (float*)malloc( sizeof(float)*n);
 
     for(int i=0; i< n; i++){
         r[i] = 0;
-        for(int j=0; j< 4; j++)
-            r[i] += get(mat,i,j) * vec[j];
+        for(int j=0; j< 4; j++) {
+            r[i] += get(m,i,j) * vec[j];
+        }
     }
 
     return r;
 }
-
-Mat catMullMat(){
-    float m[4][4] = {{-0.5f,  1.5f, -1.5f,  0.5f},
-                     { 1.0f, -2.5f,  2.0f, -0.5f},
-                     {-0.5f,  0.0f,  0.5f,  0.0f},
-                     { 0.0f,  1.0f,  0.0f,  0.0f}};
-
-    Mat result = zeros();
-
-    matAssign(result,m);
-
-    return result;
-}
-
 
 Mat matRotate(float angle, float vx, float vy, float vz){
     float l = sqrt(vx*vx + vy*vy + vz*vz);
@@ -239,11 +212,24 @@ Mat matScale(float xaxis, float yaxis, float zaxis){
     return t;
 }
 
-void matAssign(Mat r, Mat value){
+void matAssign(Mat value, float r[4][4]){
 
     for( int i = 0; i<4; i++ )
         for(int j = 0;j<4; j++)
-            set(r,i,j,get(value,i,j));
+            set(value,i,j,r[i][j]);
 }
 
 int factorial(int n){ return (n < 2) ? 1 : n*factorial(n-1); }
+
+Mat catMullMat(){
+    float m[4][4] = {{-0.5f,  1.5f, -1.5f,  0.5f},
+                     { 1.0f, -2.5f,  2.0f, -0.5f},
+                     {-0.5f,  0.0f,  0.5f,  0.0f},
+                     { 0.0f,  1.0f,  0.0f,  0.0f}};
+
+    Mat result = zeros();
+
+    matAssign(result,m);
+
+    return result;
+}
