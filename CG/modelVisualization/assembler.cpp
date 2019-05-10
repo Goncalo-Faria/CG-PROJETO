@@ -27,8 +27,6 @@ typedef struct assembler{
     GLuint buffer;
 } *Assembler;
 
-Point * outbuffer;
-
 void parseModel(const char * filename, Assembler state);
 Assembler parseGroups(XMLNode * group, Assembler state);
 vector<string> split(string strToSplit, char delimeter);
@@ -347,24 +345,9 @@ Assembler parseGroups(XMLNode * group, Assembler state)
 	return state;
 }
 
-void assemblerInterpret(Assembler reference, int time){
-    branchInterpret(&(reference->root), reference->points ,outbuffer,time);
-}
-
 void assemblerDraw(Assembler reference, int time){
 
-    glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);
-
-    outbuffer = (Point*)glMapBuffer(GL_ARRAY_BUFFER,GL_READ_WRITE);
-
-    assemblerInterpret(reference, time);
-
-    glUnmapBuffer(GL_ARRAY_BUFFER);
-
-    glVertexPointer(3,GL_FLOAT,0,0);
-    glDrawArrays(GL_TRIANGLES, 0, reference->points->size());
-
-    //branchDraw( &(reference->root) );
+    branchDraw( &(reference->root), time);
 
     glutPostRedisplay();
 
@@ -381,16 +364,7 @@ void assemblerBufferData(Assembler reference){
 
     assemblerOptimize(reference);
 
-    //branchBufferData(&(reference->root) );
-
-    glGenBuffers(1, &(reference->buffer) );
-    glBindBuffer(GL_ARRAY_BUFFER,reference->buffer);
-    glBufferData(
-            GL_ARRAY_BUFFER,
-            reference->points->size() * sizeof(Point),
-            &(reference->points->at(0)),
-            GL_DYNAMIC_DRAW
-    );
+    branchBufferData(&(reference->root) );
 }
 
 

@@ -4,25 +4,46 @@
 #include <cstring>
 
 typedef struct mat{
-    float ** mat;
+    float * mat;
 } *Mat;
 
+static int rowMaj(int i, int j){
+    return i*4 + j;
+}
+
+static int colMaj(int i, int j){
+    return i + j*4;
+}
+
 static float get(Mat t, int i, int j){
-    return t->mat[i][j];
+    return t->mat[colMaj(i,j)];
 }
 
 static void set(Mat t, int i, int j, float value){
-    t->mat[i][j] = value;
+    t->mat[colMaj(i,j)] = value;
+}
+
+float * getMat( Mat m ) {
+    return m->mat;
 }
 
 static Mat alloc(){
 
     Mat m = (Mat)malloc(sizeof(struct mat));
-    m->mat = (float**)malloc(sizeof(float*)*4);
-    for(int i = 0; i< 4; i++)
-        m->mat[i] = (float*)malloc( sizeof(float) * 4 );
+    m->mat = (float*)malloc(sizeof(float)*4*4);
+    //for(int i = 0; i< 4; i++)
+    //    m->mat[i] = (float*)malloc( sizeof(float) * 4 );
 
     return m;
+}
+
+void freeMat(Mat t){
+
+    //for(int i = 0; i< 4; i++)
+    //    free(t->mat[i]);
+
+    free(t->mat);
+    free(t);
 }
 
 Mat identity(){
@@ -43,15 +64,6 @@ Mat zeros(){
     }
 
     return m;
-}
-
-void freeMat(Mat t){
-
-    for(int i = 0; i< 4; i++)
-        free(t->mat[i]);
-
-    free(t->mat);
-    free(t);
 }
 
 Mat matRx(float angle){
@@ -104,7 +116,6 @@ Mat matmul(Mat a, Mat b){
     return result;
 }
 
-
 float* crossVecProd(float *a, float *b) {
 
     float * res = (float*)malloc( sizeof(float)*3 );
@@ -116,7 +127,7 @@ float* crossVecProd(float *a, float *b) {
     return res;
 }
 
-Mat upsidemat(float*deriv , float*norm){
+Mat upsideMat(float *deriv, float *norm){
 
 
     float* z = crossVecProd(deriv,norm);
@@ -155,14 +166,14 @@ Mat upsidemat(float*deriv , float*norm){
     return m;
 }
 
-float * vecmul( Mat m ,float * vec, int n){
+float * vecMul(Mat mat, float *vec, int n){
 
     float * r = (float*)malloc( sizeof(float)*n);
 
     for(int i=0; i< n; i++){
         r[i] = 0;
         for(int j=0; j< 4; j++) {
-            r[i] += get(m,i,j) * vec[j];
+            r[i] += get(mat,i,j) * vec[j];
         }
     }
 
@@ -218,8 +229,6 @@ void matAssign(Mat value, float r[4][4]){
         for(int j = 0;j<4; j++)
             set(value,i,j,r[i][j]);
 }
-
-int factorial(int n){ return (n < 2) ? 1 : n*factorial(n-1); }
 
 Mat catMullMat(){
     float m[4][4] = {{-0.5f,  1.5f, -1.5f,  0.5f},

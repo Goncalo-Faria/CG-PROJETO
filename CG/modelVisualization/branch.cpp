@@ -1,5 +1,6 @@
 #if defined(_WIN32)
 #include "GL/glut.h"
+    #include "GL/glew.h"
 #else
 #include <GLUT/glut.h>
 #endif
@@ -14,6 +15,7 @@
 #include <sstream>
 #include <string>
 #include <cmath>
+#include <list>
 
 using namespace std;
 
@@ -86,24 +88,30 @@ void assemblerTransformate( Assembler ass, Mat mat){
 
 }
 
-void applyTransformation( Transformation transformation, Point* outgoing, long start, long end){
+void applyTransformation( Transformation transformation ){
+    
+    glPushMatrix();
+    glMultMatrixf(getMat(transformation->mat));
+}
 
+void applyTransformation( Transformation transformation, Point* outgoing, long start, long end){
+    
     Point point;
     float p[4];
-
+    
     p[3] = 1;
-
+    
     for( long s = start; s< end; s++ ){
         p[0] = outgoing[s].p[0];
         p[1] = outgoing[s].p[1];
         p[2] = outgoing[s].p[2];
-
-        float*tmp = vecmul( transformation->mat ,p, 3);
-
+        
+        float*tmp = vecMul( transformation->mat ,p, 3);
+        
         point.p[0] = tmp[0] ;
         point.p[1] = tmp[1];
         point.p[2] = tmp[2];
-
+        
         outgoing[s] = point;
         free(tmp);
     }
@@ -215,17 +223,16 @@ void assemblerAnimate( Assembler ass, int period, vector<Point> * controlpoints,
     }
 }
 
-void applyRotationAnimation( int period, Point axis, Point* outgoing, long start, long end, int elapsedtime ){
+void applyRotationAnimation(int period, Point axis, int elapsedtime){
     float w = (float)elapsedtime / (float)period;
-
+    
     Mat mat = matRotate(360*w,axis.p[0],axis.p[1],axis.p[2]);
-
+    
     Transformation t = mkTransformation(mat);
-
-    applyTransformation(t ,outgoing, start, end);
-
+    
+    applyTransformation(t);
+    
     unmkTransformation(t);
-
 }
 
 void getCatmullRomPoint(float t,Point p0, Point p1, Point p2, Point p3, float *pos, float *deriv) {
@@ -237,9 +244,9 @@ void getCatmullRomPoint(float t,Point p0, Point p1, Point p2, Point p3, float *p
     float y[4] = { p0.p[1],p1.p[1],p2.p[1],p3.p[1] };
     float z[4] = { p0.p[2],p1.p[2],p2.p[2],p3.p[2] };
 
-    a[0] = vecmul(m, x, 4);
-    a[1] = vecmul(m, y, 4);
-    a[2] = vecmul(m, z, 4);
+    a[0] = vecMul(m, x, 4);
+    a[1] = vecMul(m, y, 4);
+    a[2] = vecMul(m, z, 4);
 
     // Compute pos = T * A
     float tt[4] = { t*t*t, t*t, t, 1 };
@@ -278,54 +285,52 @@ void getGlobalCatmullRomPoint(float gt, float *pos, float *deriv, vector<Point> 
     getCatmullRomPoint(t, axis->at(indices[0]), axis->at(indices[1]), axis->at(indices[2]), axis->at(indices[3]), pos, deriv);
 }
 
-void applyTranslationAnimation( int period, vector<Point> * axis, Point* outgoing, long start, long end, int elapsed_time ){
+void applyTranslationAnimation( int period, vector<Point> * axis, int elapsed_time ){
     float pos[3];
     float deriv[3];
     float gt = (float)(elapsed_time%period) / (float)period;
-
-    //printf(" ## %ld \n", axis->size());
+    
     Point norm = axis->at( axis->size()-1 );
-
+    
     axis->pop_back();
-
+    
     getGlobalCatmullRomPoint( gt, pos, deriv, axis);
-
-    Mat p1 = matTranslate(pos[0], pos[1],pos[2]);
-    Mat p2 = upsidemat(deriv,norm.p);
-
+    
+    Mat p1 = matTranslate(pos[0], pos[1], pos[2]);
+    Mat p2 = upsideMat(deriv, norm.p);
+    
     Transformation t = mkTransformation(matmul(p1,p2));
-
-    applyTransformation(t,outgoing,start,end);
-
+    
+    applyTransformation(t);
+    
     freeMat(p1);
     freeMat(p2);
-
+    
     unmkTransformation(t);
     /*
-    float posi[3];
-    float derivi[3];
-    glBegin(GL_LINE_LOOP);
-    for (float gti = 0; gti < 1; gti += 0.001) {
-        getGlobalCatmullRomPoint(gti,posi,derivi,axis);
-        glVertex3f(posi[0],posi[1],posi[2]);
-    }
-    glEnd();
-    */
-
-    axis->emplace_back(norm);
-
+     float posi[3];
+     float derivi[3];
+     glBegin(GL_LINE_LOOP);
+     for (float gti = 0; gti < 1; gti += 0.001) {
+     getGlobalCatmullRomPoint(gti,posi,derivi,axis);
+     glVertex3f(posi[0],posi[1],posi[2]);
+     }
+     glEnd();
+     */
+     axis->emplace_back(norm);
+     
 }
 
-void applyAnimation( Animation animation, Point* outgoing, long start, long end, int time){
+void applyAnimation( Animation animation, int time){
     switch( animation->type ){
-
+            
         case ROTATION:
-            applyRotationAnimation(animation->period, animation->auxpoints->at(0), outgoing, start, end, time);
+            applyRotationAnimation(animation->period, animation->auxpoints->at(0), time);
             break;
         case CURVED_TRANSLATION:
-            applyTranslationAnimation(animation->period, animation->auxpoints, outgoing, start, end, time);
+            applyTranslationAnimation(animation->period, animation->auxpoints,
+                time);
             break;
-
     }
 }
 
@@ -385,79 +390,6 @@ void unmkBranch( Branch b ){
     free(b);
 }
 
-Model recInterpret(Branch b, vector<Point>* inpoints, Point* outpoints, int time){
-
-    switch( b->type ){
-
-        case ANIMATION: {
-
-            Animation ani = (Animation)b->node;
-            long minv = inpoints->size();
-            long maxv = -1;
-
-            for(Branch desbranch : *(ani->subbranch) ) {
-
-                Model mod = recInterpret(desbranch, inpoints, outpoints,time);
-
-                minv = min(minv,mod->starti);
-                maxv = max(maxv,mod->endi);
-                unmkModel(mod);
-            }
-
-            applyAnimation(ani, outpoints, minv, maxv, time);
-
-            if( minv < maxv )
-                return mkModel(minv,maxv);
-            else
-                return mkModel(0,0);
-
-            break;
-        }
-
-        case TRANSFORMATION: {
-            //printf("Transformation\n");
-            Transformation t = (Transformation)b->node;
-            long minv = inpoints->size();
-            long maxv = -1;
-
-            for(Branch desbranch : *(t->subbranch) ) {
-
-                Model mod = recInterpret(desbranch, inpoints, outpoints,time);
-
-                minv = min(minv,mod->starti);
-                maxv = max(maxv,mod->endi);
-                unmkModel(mod);
-            }
-
-            applyTransformation(t, outpoints, minv, maxv);
-
-            if( minv < maxv )
-                return mkModel(minv,maxv);
-            else
-                return mkModel(0,0);
-
-            break;
-        }
-
-        case MODEL: {
-            //printf("Model\n");
-            Model mo = (Model)b->node;
-            //printf(" %ld - %ld   \n", mo->starti, mo->endi);
-            for(long i = mo->starti; i < mo->endi; i++)
-                outpoints[i] = inpoints->at(i);
-
-            return mkModel(mo->starti,mo->endi);
-        }
-
-        default:
-            //printf("sometype \n");
-            return mkModel(inpoints->size(),-1);
-    }
-}
-
-void branchInterpret(Branch b, vector<Point>* inpoints, Point* outpoints, int time){
-    unmkModel(recInterpret(b, inpoints, outpoints,time));
-}
 
 void branchOptimizeTransf( Branch b ){
     switch( b->type ){
@@ -612,7 +544,7 @@ void branchOptimizeModels( vector<Point> * points, Branch b){
                     nm->starti = min(nm->starti,model->starti);
                     nm->endi = max(nm->endi,model->endi);
 
-                    applyTransformation(t, points->data(), model->starti, model->endi);
+                    //applyTransformation(t, points->data(), model->starti, model->endi);
 
                     applyTransformation(t, model->points->data(), 0, model->points->size());
                     nm->points->insert(nm->points->end(), model->points->begin(), model->points->end());// append data
@@ -684,25 +616,32 @@ void branchBufferData(Branch root){
     }
 }
 
-void branchDraw(Branch root){
+void branchDraw(Branch root, int time){
     switch( root->type ){
         case EMPTY: { break; }
-
+            
         case ANIMATION: {
             Animation t = (Animation)root->node;
-
+            
+            applyAnimation(t, time);
+            
             for( Branch nb : *(t->subbranch) )
-                branchDraw(nb);
-
+                branchDraw(nb, time);
+            
+            glPopMatrix();
+            
             break;
         }
 
         case TRANSFORMATION: {
             Transformation t = (Transformation)root->node;
-
-            for( Branch nb : *(t->subbranch) ) {
-                branchDraw(nb);
-            }
+            
+            applyTransformation(t);
+            
+            for( Branch nb : *(t->subbranch) )
+                branchDraw(nb, time);
+            
+            glPopMatrix();
 
             break;
         }

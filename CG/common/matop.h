@@ -17,11 +17,13 @@ Mat matRotate(float angle, float vx, float vy, float vz);
 Mat matTranslate(float x, float y, float z);
 Mat matScale(float xaxis, float yaxis, float zaxis);
 
-float * vecmul( Mat mat ,float * vec, int n);
+float * vecMul(Mat mat, float *vec, int n);
 
 float* crossVecProd(float *a, float *b);
 
-Mat upsidemat(float*deriv , float*norm);
+Mat upsideMat(float *deriv, float *norm);
 Mat catMullMat();
+
+float * getMat( Mat m );
 
 #endif

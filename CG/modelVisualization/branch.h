@@ -52,6 +52,6 @@ void branchInterpret(Branch b, std::vector<Point>* inpoints, Point * outpoints, 
 
 void branchBufferData(Branch root);
 void branchOptimize(std::vector<Point> * points , Branch b);
-void branchDraw(Branch root);
+void branchDraw(Branch root, int time);
 
 #endif

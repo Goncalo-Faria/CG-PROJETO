@@ -47,6 +47,8 @@ void renderScene() {
 
 	int time = glutGet(GLUT_ELAPSED_TIME);
 
+    glMatrixMode(GL_MODELVIEW);
+
     assemblerDraw(mainframe, time);
 
 	glutSwapBuffers();
