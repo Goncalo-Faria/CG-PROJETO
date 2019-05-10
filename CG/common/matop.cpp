@@ -3,83 +3,115 @@
 #include <cstdlib>
 #include <cstring>
 
+typedef struct mat{
+    float * mat;
+} *Mat;
 
-float** identity(){
-    float**t = (float**)malloc(sizeof(float*)*4);
-    for(int i = 0; i< 4; i++) {
-        t[i] = (float*)malloc( sizeof(float) * 4 );
-        for (int j = 0; j < 4; j++)
-            t[i][j] = (i == j);
-    }
-
-    return t;
+static int rowMaj(int i, int j){
+    return i*4 + j;
 }
 
-float** zeros(){
-    float**t = (float**)malloc(sizeof(float*)*4);
-    for(int i = 0; i< 4; i++) {
-        t[i] = (float*)malloc( sizeof(float) * 4 );
-        for (int j = 0; j < 4; j++)
-            t[i][j] = 0;
-    }
-
-    return t;
+static int colMaj(int i, int j){
+    return i + j*4;
 }
 
-void freeMat(float** t){
+static float get(Mat t, int i, int j){
+    return t->mat[colMaj(i,j)];
+}
 
-    for(int i = 0; i< 4; i++)
-        free(t[i]);
+static void set(Mat t, int i, int j, float value){
+    t->mat[colMaj(i,j)] = value;
+}
 
+float * getMat( Mat m ) {
+    return m->mat;
+}
+
+static Mat alloc(){
+
+    Mat m = (Mat)malloc(sizeof(struct mat));
+    m->mat = (float*)malloc(sizeof(float)*4*4);
+    //for(int i = 0; i< 4; i++)
+    //    m->mat[i] = (float*)malloc( sizeof(float) * 4 );
+
+    return m;
+}
+
+void freeMat(Mat t){
+
+    //for(int i = 0; i< 4; i++)
+    //    free(t->mat[i]);
+
+    free(t->mat);
     free(t);
 }
 
-float** matRx(float angle){
-	float**t = identity();
+Mat identity(){
+    Mat m = alloc();
+    for(int i = 0; i< 4; i++) {
+        for (int j = 0; j < 4; j++)
+            set(m, i, j, (i == j));
+    }
 
-	float rad = (M_PI/180.0)*angle;
-
-	t[1][1] = cos(rad);
-	t[1][2] = -sin(rad);
-	t[2][1] = sin(rad);
-	t[2][2] = cos(rad);
-
-	return t;
+    return m;
 }
 
-float** matRy(float angle){
-    float**t = identity();
+Mat zeros(){
+    Mat m = alloc();
+    for(int i = 0; i< 4; i++) {
+        for (int j = 0; j < 4; j++)
+            set(m, i, j, 0);
+    }
 
-	float rad = (M_PI/180.0)*angle;
-
-	t[0][0] = cos(rad);
-	t[0][2] = sin(rad);
-	t[2][0] = -sin(rad);
-	t[2][2] = cos(rad);
-
-	return t;
+    return m;
 }
 
-float** matRz(float angle){
-    float**t = identity();
+Mat matRx(float angle){
+    Mat m = identity();
 
-	float rad = (M_PI/180.0)*angle;
+    float rad = (M_PI/180.0)*angle;
 
-	t[0][0] = cos(rad);
-	t[0][1] = -sin(rad);
-	t[1][0] = sin(rad);
-	t[1][1] = cos(rad);
+    set(m,1,1,cos(rad));
+    set(m,1,2,-sin(rad));
+    set(m,2,1,sin(rad));
+    set(m,2,2,cos(rad));
 
-	return t;
+    return m;
 }
 
-float** matmul(float** a, float** b){
-    float ** result = zeros();
+Mat matRy(float angle){
+    Mat t = identity();
+
+    float rad = (M_PI/180.0)*angle;
+
+    set(t,0,0,cos(rad));
+    set(t,0,2,sin(rad));
+    set(t,2,0,-sin(rad));
+    set(t,2,2,cos(rad));
+
+    return t;
+}
+
+Mat matRz(float angle){
+    Mat t = identity();
+
+    float rad = (M_PI/180.0)*angle;
+
+    set(t,0,0,cos(rad));
+    set(t,0,1,-sin(rad));
+    set(t,1,0,sin(rad));
+    set(t,1,1,cos(rad));
+
+    return t;
+}
+
+Mat matmul(Mat a, Mat b){
+    Mat result = zeros();
 
     for( int i = 0; i<4; i++ )
         for(int j = 0;j<4; j++)
             for(int k = 0; k<4; k++)
-                result[i][j] += a[i][k] *  b[k][j];
+                set(result,i,j, (get(result,i,j) + get(a,i,k)*get(b,k,j)) );
 
     return result;
 }
@@ -95,7 +127,7 @@ float* crossVecProd(float *a, float *b) {
     return res;
 }
 
-float ** upsidemat(float*deriv , float*norm){
+Mat upsideMat(float *deriv, float *norm){
 
 
     float* z = crossVecProd(deriv,norm);
@@ -119,132 +151,94 @@ float ** upsidemat(float*deriv , float*norm){
 
     free(yn);
 
-    float** mat = (float**)malloc(sizeof(float*)*4);
+    Mat m = zeros();
 
-    mat[0] = (float*)malloc(sizeof(float)*4);
+    set(m,0,0,deriv[0]); set(m,0,1,norm[0]); set(m,0,2,z[0]);
 
-    mat[0][0] = deriv[0]; mat[0][1]=norm[0]; mat[0][2]=z[0]; mat[0][3]=0;
+    set(m,1,0,deriv[1]); set(m,1,1,norm[1]); set(m,1,2,z[1]);
 
-    mat[1] = (float*)malloc(sizeof(float)*4);
+    set(m,2,0,deriv[2]); set(m,2,1,norm[2]); set(m,2,2,z[2]);
 
-    mat[1][0] = deriv[1]; mat[1][1]=norm[1]; mat[1][2]=z[1]; mat[1][3]=0;
-
-    mat[2] = (float*)malloc(sizeof(float)*4);
-
-    mat[2][0] = deriv[2]; mat[2][1]=norm[2]; mat[2][2]=z[2]; mat[2][3]=0;
-
-    mat[3] = (float*)malloc(sizeof(float)*4);
-
-    mat[3][0] = 0; mat[3][1]=0; mat[3][2]=0; mat[3][3]=1;
+    set(m,3,3,1);
 
     free(z);
-    return mat;
 
+    return m;
 }
 
-float * vecmul( float** mat ,float * vec){
-
-    float * r = (float*)malloc( sizeof(float)*3);
-
-    for(int i=0; i< 3; i++){
-        r[i] = 0;
-        for(int j=0; j< 4; j++)
-            r[i] += mat[i][j] * vec[j];
-    }
-
-    return r;
-}
-
-float * vecmul( float mat[4][4] ,float * vec, int n){
+float * vecMul(Mat mat, float *vec, int n){
 
     float * r = (float*)malloc( sizeof(float)*n);
 
     for(int i=0; i< n; i++){
         r[i] = 0;
-        for(int j=0; j< 4; j++)
-            r[i] += mat[i][j] * vec[j];
+        for(int j=0; j< 4; j++) {
+            r[i] += get(mat,i,j) * vec[j];
+        }
     }
 
     return r;
 }
 
-
-float** matmul(float a[4][4], float** b){
-    float ** result = zeros();
-
-    for( int i = 0; i<4; i++ )
-        for(int j = 0;j<4; j++)
-            for(int k = 0; k<4; k++)
-                result[i][j] += a[i][k] *  b[k][j];
-
-    return result;
-}
-
-
-float** matRotate(float angle, float vx, float vy, float vz){
+Mat matRotate(float angle, float vx, float vy, float vz){
     float l = sqrt(vx*vx + vy*vy + vz*vz);
 
     float rx = vx*angle/l;
     float ry = vy*angle/l;
     float rz = vz*angle/l;
 
-    float** mrx = matRx(rx);
-    float** mry = matRy(ry);
-    float** mrz = matRz(rz);
+    Mat mrx = matRx(rx);
+    Mat mry = matRy(ry);
+    Mat mrz = matRz(rz);
 
-    float** mr1 = matmul(mrx,mry);
-    float** mr2 = matmul(mr1,mrz);
+    Mat mr1 = matmul(mrx,mry);
+    Mat mr2 = matmul(mr1,mrz);
+
     freeMat(mr1);
+
+    freeMat(mrx);
+    freeMat(mry);
+    freeMat(mrz);
 
     return mr2;
 }
 
-float ** matTranslate(float x, float y, float z){
-    float** t = identity();
+Mat matTranslate(float x, float y, float z){
+    Mat t = identity();
 
-    t[0][3] = x;
-    t[1][3] = y;
-    t[2][3] = z;
-
-    return t;
-}
-
-float** matScale(float xaxis, float yaxis, float zaxis){
-    float** t = identity();
-
-    t[0][0] = xaxis;
-    t[1][1] = yaxis;
-    t[2][2] = zaxis;
+    set(t,0,3,x);
+    set(t,1,3,y);
+    set(t,2,3,z);
 
     return t;
 }
 
-void matAssign(float**r, float**value){
+Mat matScale(float xaxis, float yaxis, float zaxis){
+    Mat t = identity();
+
+    set(t,0,0,xaxis);
+    set(t,1,1,yaxis);
+    set(t,2,2,zaxis);
+
+    return t;
+}
+
+void matAssign(Mat value, float r[4][4]){
 
     for( int i = 0; i<4; i++ )
         for(int j = 0;j<4; j++)
-            r[i][j] = value[i][j];
+            set(value,i,j,r[i][j]);
 }
 
-void matAssign(float r[4][4], float**value){
+Mat catMullMat(){
+    float m[4][4] = {{-0.5f,  1.5f, -1.5f,  0.5f},
+                     { 1.0f, -2.5f,  2.0f, -0.5f},
+                     {-0.5f,  0.0f,  0.5f,  0.0f},
+                     { 0.0f,  1.0f,  0.0f,  0.0f}};
 
-    for( int i = 0; i<4; i++ )
-        for(int j = 0;j<4; j++)
-            r[i][j] = value[i][j];
-}
+    Mat result = zeros();
 
-void matAssign(float r[4][4], float value[4][4] ){
+    matAssign(result,m);
 
-    for( int i = 0; i<4; i++ )
-        for(int j = 0;j<4; j++)
-            r[i][j] = value[i][j];
-}
-
-int factorial(int n){ return (n < 2) ? 1 : n*factorial(n-1); }
-
-float bernstein(int i, int n, float t){
-	float r = (float) factorial(n) / (float) (factorial(i) * factorial(n - i));
-	r *= pow(t,i);
-	r *= pow(1-t,n-i);
-	return r;
+    return result;
 }
